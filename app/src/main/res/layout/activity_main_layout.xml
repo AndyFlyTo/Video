@@ -1,0 +1,283 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:gcy="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#38a4b2"
+    android:clipToPadding="true"
+    android:fitsSystemWindows="true">
+
+    <com.gcy.view.SlidingMenu
+        android:id="@+id/sliding_menu"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:scrollbars="none"
+        gcy:rightPadding="150dp">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
+
+            <include layout="@layout/activity_main_left_menu" />
+
+            <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:orientation="vertical">
+
+                <com.gcy.view.TitleBar
+                    android:id="@+id/title_bar"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content">
+
+                </com.gcy.view.TitleBar>
+
+                <RelativeLayout
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:background="@android:color/white">
+
+                    <TabHost
+                        android:id="@+id/tabHost"
+                        android:layout_width="fill_parent"
+                        android:layout_height="fill_parent"
+                        android:layout_centerHorizontal="true"
+                        android:layout_centerVertical="true">
+
+                        <LinearLayout
+                            android:layout_width="fill_parent"
+                            android:layout_height="fill_parent"
+                            android:layout_marginBottom="30dp"
+                            android:orientation="vertical">
+
+                            <TabWidget
+                                android:id="@android:id/tabs"
+                                android:layout_width="fill_parent"
+                                android:layout_height="wrap_content"
+                                android:visibility="gone"></TabWidget>
+
+                            <FrameLayout
+                                android:id="@android:id/tabcontent"
+                                android:layout_width="fill_parent"
+                                android:layout_height="fill_parent">
+
+                                <LinearLayout
+                                    android:id="@+id/tab1"
+                                    android:layout_width="fill_parent"
+                                    android:layout_height="fill_parent"
+                                    android:orientation="vertical">
+
+                                    <RelativeLayout
+                                        android:layout_width="fill_parent"
+                                        android:layout_height="fill_parent"
+                                        android:paddingBottom="40dp"
+                                        android:paddingRight="5dp">
+
+                                        <ListView
+                                            android:id="@+id/layout_myappliances_lv"
+                                            android:layout_width="fill_parent"
+                                            android:layout_height="fill_parent"></ListView>
+
+                                        <com.gcy.view.CrossView
+                                            android:id="@+id/layout_myappliances_button_add"
+                                            android:layout_width="40dp"
+                                            android:layout_height="40dp"
+                                            android:layout_alignParentBottom="true"
+                                            android:layout_alignParentRight="true"
+                                            android:layout_gravity="center"
+                                            android:padding="10dp"
+                                            app:lineColor="@android:color/black" />
+
+
+                                    </RelativeLayout>
+                                </LinearLayout>
+
+                                <LinearLayout
+                                    android:id="@+id/tab2"
+                                    android:layout_width="fill_parent"
+                                    android:layout_height="fill_parent"
+                                    android:orientation="vertical">
+
+                                    <LinearLayout
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:orientation="horizontal">
+
+                                        <ListView
+                                            android:id="@+id/main_tap_environment_listiew"
+                                            android:layout_width="match_parent"
+                                            android:layout_height="match_parent"
+                                            android:scrollbars="none">
+
+                                        </ListView>
+                                    </LinearLayout>
+
+
+                                </LinearLayout>
+
+                                <LinearLayout
+                                    android:id="@+id/tab3"
+                                    android:layout_width="fill_parent"
+                                    android:layout_height="fill_parent"
+                                    android:orientation="vertical"
+                                    android:padding="10dp">
+
+                                    <LinearLayout
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:orientation="horizontal"
+                                        android:paddingTop="100dp">
+
+                                        <Button
+
+                                            android:id="@+id/layout_main_open_video"
+                                            android:layout_width="160dp"
+                                            android:layout_height="160dp"
+                                            android:background="@drawable/btn_blue_selector"
+                                            android:text="打开视频"
+                                            android:textSize="20sp" />
+
+                                        <ImageView
+                                            android:layout_width="20dp"
+                                            android:layout_height="match_parent" />
+
+                                        <LinearLayout
+                                            android:id="@+id/layout_main_no_video"
+                                            android:layout_width="160dp"
+                                            android:layout_height="160dp"
+                                            android:background="@drawable/btn_blue_selector"
+
+                                            android:orientation="vertical">
+
+                                            <TextView
+                                                android:layout_width="wrap_content"
+                                                android:layout_height="wrap_content"
+                                                android:layout_gravity="center"
+                                                android:paddingTop="20dp"
+                                                android:text="免打扰"
+                                                android:textSize="18sp" />
+
+                                            <LinearLayout
+                                                android:layout_width="wrap_content"
+                                                android:layout_height="wrap_content"
+                                                android:layout_gravity="center"
+                                                android:gravity="center"
+                                                android:paddingTop="10dp">
+
+                                                <com.gcy.view.CrossView
+
+                                                    android:id="@+id/layout_main_no_video_crossview"
+                                                    android:layout_width="40dp"
+                                                    android:layout_height="40dp"
+                                                    android:layout_gravity="center"
+                                                    app:lineColor="@android:color/black" />
+                                            </LinearLayout>
+
+                                            <TextView
+                                                android:id="@+id/layout_main_no_video_text"
+                                                android:layout_width="wrap_content"
+                                                android:layout_height="wrap_content"
+                                                android:layout_gravity="center"
+                                                android:paddingTop="10dp"
+                                                android:text="关闭"
+                                                android:textSize="18sp" />
+
+
+                                        </LinearLayout>
+                                    </LinearLayout>
+
+
+                                </LinearLayout>
+
+                            </FrameLayout>
+
+                        </LinearLayout>
+                    </TabHost>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentBottom="true"
+                        android:background="#38a4b2"
+                        android:orientation="horizontal"
+
+                        >
+
+                        <LinearLayout
+                            android:id="@+id/main_tap_myappliances"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                            <ImageView
+                                android:id="@+id/main_tap_myappliances_image"
+                                android:layout_width="30dp"
+                                android:layout_height="30dp"
+                                android:layout_gravity="center"
+                                android:layout_marginTop="5dp" />
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginBottom="5dp"
+                                android:gravity="center"
+                                android:text="我的设备" />
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:id="@+id/main_tap_environment"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                            <ImageView
+                                android:id="@+id/main_tap_environment_image"
+                                android:layout_width="30dp"
+                                android:layout_height="30dp"
+                                android:layout_gravity="center"
+                                android:layout_marginTop="5dp" />
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginBottom="5dp"
+                                android:gravity="center"
+                                android:text="环境参数" />
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:id="@+id/main_tap_chat"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                            <ImageView
+                                android:id="@+id/main_tap_chat_image"
+                                android:layout_width="30dp"
+                                android:layout_height="30dp"
+                                android:layout_gravity="center"
+                                android:layout_marginTop="5dp" />
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginBottom="5dp"
+                                android:gravity="center"
+                                android:text="视频对讲" />
+
+                        </LinearLayout>
+                    </LinearLayout>
+                </RelativeLayout>
+            </LinearLayout>
+        </LinearLayout>
+
+
+    </com.gcy.view.SlidingMenu>
+
+</RelativeLayout>
