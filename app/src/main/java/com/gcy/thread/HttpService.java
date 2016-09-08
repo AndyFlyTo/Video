@@ -8,6 +8,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.Vibrator;
+import android.util.Log;
 import android.view.WindowManager;
 
 import com.example.changvvb.gstreamer3.Gstreamer_test2;
@@ -170,6 +171,7 @@ public class HttpService extends Service {
 
                         BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(conn.getOutputStream()));
                         String ipinfo = "ip " + GetLocalIP.getLocalIpAddress();
+                        Log.d("chen",ipinfo);
                         bw.write(ipinfo);
                         bw.flush();
                         bw.close();

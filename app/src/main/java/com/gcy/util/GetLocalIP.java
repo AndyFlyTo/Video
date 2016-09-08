@@ -1,5 +1,7 @@
 package com.gcy.util;
 
+import android.util.Log;
+
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
@@ -28,7 +30,7 @@ public class GetLocalIP {
             return null;
         }
         String []str = sb.toString().split("_");
-
+        Log.d("chen",str[str.length-1]);
         return str[str.length-1];
     }
 }

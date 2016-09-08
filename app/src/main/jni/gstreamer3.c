@@ -157,7 +157,12 @@ static void *app_function (void *userdata) {
 
   /* Build pipeline */
   //data->pipeline = gst_parse_launch("videotestsrc ! warptv ! videoconvert ! autovideosink", &error);
-  data->pipeline = gst_parse_launch("udpsrc port=1111 caps=\"application/x-rtp, payload=127\"  !  rtph264depay ! h264parse  ! openh264dec ! autovideosink sync=false udpsrc port=2222 caps=\"application/x-rtp, media=(string)audio, clock-rate=(int)44100, encoding-name=(string)L16, encoding-params=(string)1, channels=(int)1, payload=(int)96\" ! rtpL16depay ! audioconvert ! audioresample ! autoaudiosink ", &error);
+
+  //data->pipeline = gst_parse_launch("udpsrc port=1111 caps=\"application/x-rtp, payload=127\"  !  rtph264depay ! h264parse  ! openh264dec ! autovideosink sync=false udpsrc port=2222 caps=\"application/x-rtp, media=(string)audio, clock-rate=(int)44100, encoding-name=(string)L16, encoding-params=(string)1, channels=(int)1, payload=(int)96\" ! rtpL16depay ! audioconvert ! audioresample ! autoaudiosink ", &error);
+ // data->pipeline = gst_parse_launch("udpsrc port=1111 ! application/x-rtp, payload=96 ! rtpjitterbuffer ! rtph264depay ! avdec_h264 ! fpsdisplaysink sync=false text-overlay=false udpsrc port=2222 caps = \"application/x-rtp\" ! queue ! rtppcmudepay ! mulawdec ! alsasink", &error);
+//Pause的管道 // data->pipeline = gst_parse_launch("udpsrc port=5000 ! queue2 max-size-buffers=1 ! decodebin ! autovideosink sync=false udpsrc port=5555 caps=\"application/x-rtp, media=(string)audio, clock-rate=(int)44100, encoding-name=(string)L16, encoding-params=(string)1, channels=(int)1, payload=(int)96\" ! rtpL16depay ! audioconvert ! audioresample ! autoaudiosink",&error);
+data->pipeline = gst_parse_launch("udpsrc port=5000 ! application/x-rtp, payload=96 ! rtpjitterbuffer ! rtph264depay ! avdec_h264 ! fpsdisplaysink sync=false text-overlay=false udpsrc port=5555 caps=\"application/x-rtp, media=(string)audio, clock-rate=(int)44100, encoding-name=(string)L16, encoding-params=(string)1, channels=(int)1, payload=(int)96\" ! rtpL16depay ! audioconvert ! audioresample ! autoaudiosink",&error);
+
   if (error) {
     gchar *message = g_strdup_printf("Unable to build pipeline: %s", error->message);
     g_clear_error (&error);
@@ -238,8 +243,11 @@ static void gst_native_finalize (JNIEnv* env, jobject thiz) {
 
 /* Set pipeline to PLAYING state */
 static void gst_native_play (JNIEnv* env, jobject thiz) {
+GST_DEBUG ("uuu PLAYING");
   CustomData *data = GET_CUSTOM_DATA (env, thiz, custom_data_field_id);
   if (!data) return;
+
+  //在视频上面显示的
   GST_DEBUG ("Setting state to PLAYING");
   gst_element_set_state (data->pipeline, GST_STATE_PLAYING);
 }

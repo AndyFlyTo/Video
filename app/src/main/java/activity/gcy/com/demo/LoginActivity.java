@@ -11,6 +11,7 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 
+import com.example.changvvb.gstreamer3.Gstreamer3;
 import com.gcy.beans.TemporaryData;
 import com.gcy.thread.HttpGetLoginThread;
 
@@ -56,9 +57,9 @@ public class LoginActivity extends Activity {
 //                progressDialog.setMessage("请稍后...");
 //                progressDialog.setCancelable(true);
 //                progressDialog.show();
-                startActivity(new Intent(LoginActivity.this,MainActivity.class));
-
-
+                //startActivity(new Intent(LoginActivity.this,MainActivity.class));
+                Intent intent = new Intent(LoginActivity.this, Gstreamer3.class);
+                startActivity(intent);
             }
         });
     }
