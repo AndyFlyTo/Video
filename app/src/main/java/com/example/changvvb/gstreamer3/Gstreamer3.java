@@ -59,6 +59,7 @@ public class Gstreamer3 extends Activity implements SurfaceHolder.Callback {
         play.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
                 is_playing_desired = true;
+                Log.d("chen","playing");
                 nativePlay();
             }
         });
@@ -67,6 +68,7 @@ public class Gstreamer3 extends Activity implements SurfaceHolder.Callback {
         pause.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
                 is_playing_desired = false;
+                Log.d("chen","pause");
                 nativePause();
             }
         });
@@ -182,6 +184,7 @@ public class Gstreamer3 extends Activity implements SurfaceHolder.Callback {
         final Activity activity = this;
         runOnUiThread(new Runnable() {
             public void run() {
+               //TODO
                 activity.findViewById(R.id.button_play).setEnabled(true);
                 activity.findViewById(R.id.button_stop).setEnabled(true);
             }

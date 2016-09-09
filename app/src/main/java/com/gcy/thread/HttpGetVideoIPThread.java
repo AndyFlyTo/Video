@@ -3,7 +3,9 @@ package com.gcy.thread;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.util.Log;
 
+import com.example.changvvb.gstreamer3.Gstreamer3;
 import com.example.changvvb.gstreamer3.Gstreamer_test2;
 import com.gcy.beans.IntentKeyString;
 import com.gcy.beans.TemporaryData;
@@ -47,9 +49,6 @@ public class HttpGetVideoIPThread implements Runnable {
         while(flag)
             try {
 
-
-
-
                 URL httpUrl = new URL(Config.URL);
                 HttpURLConnection conn = (HttpURLConnection) httpUrl.openConnection();
                 conn.setRequestMethod("POST");
@@ -60,11 +59,11 @@ public class HttpGetVideoIPThread implements Runnable {
                 conn.connect();
 
 
-                BufferedWriter bw  = new BufferedWriter(new OutputStreamWriter(conn.getOutputStream()));
+              //  BufferedWriter bw  = new BufferedWriter(new OutputStreamWriter(conn.getOutputStream()));
 
-                bw.write("SEND_IP_TO_ME");
-                bw.flush();
-                bw.close();
+            //    bw.write("SEND_IP_TO_ME");
+                //bw.flush();
+                //bw.close();
                 if (conn.getResponseCode()==200) {
                     BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
                     String str1;
@@ -79,7 +78,16 @@ public class HttpGetVideoIPThread implements Runnable {
 
                     conn.disconnect();
                 flag = false;
-                if(!message.equals("NO_DEVICE")){
+
+                Log.d("chen","跳转到视频");
+                //TODO
+                Intent intent = new Intent(activity, Gstreamer3.class);
+                if(activityOrService)
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                intent.putExtra(IntentKeyString.REMOTE_VIDEO_IP,message);
+                activity.startActivity(intent);
+
+                /*if(!message.equals("NO_DEVICE")){
                 if(message.equals("0.0.0.0")){
                     flag = true;
                     try {
@@ -99,7 +107,9 @@ public class HttpGetVideoIPThread implements Runnable {
                     progressDialog.dismiss();
                     if(message.matches("\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}")){
 
-                        Intent intent = new Intent(activity, Gstreamer_test2.class);
+                        Log.d("chen","跳转到视频");
+                        //TODO Gstereamer_test2.class
+                        Intent intent = new Intent(activity, Gstreamer3.class);
                         if(activityOrService)
                             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                         intent.putExtra(IntentKeyString.REMOTE_VIDEO_IP,message);
@@ -115,7 +125,7 @@ public class HttpGetVideoIPThread implements Runnable {
 
                 }
 
-
+*/
 
 
 

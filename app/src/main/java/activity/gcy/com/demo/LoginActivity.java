@@ -58,7 +58,7 @@ public class LoginActivity extends Activity {
 //                progressDialog.setCancelable(true);
 //                progressDialog.show();
                 //startActivity(new Intent(LoginActivity.this,MainActivity.class));
-                Intent intent = new Intent(LoginActivity.this, Gstreamer3.class);
+                Intent intent = new Intent(LoginActivity.this, MainActivity.class);
                 startActivity(intent);
             }
         });

@@ -167,7 +167,6 @@ public class Gstreamer_test2 extends Activity {
     }
 
     static {
-
         System.loadLibrary("gstreamer_android");
         System.loadLibrary("sendsound");
         send_nativeClassInit();

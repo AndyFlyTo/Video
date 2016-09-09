@@ -85,6 +85,7 @@ static JNIEnv *get_jni_env (void) {
 /* Change the content of the UI's TextView */
 static void set_ui_message (const gchar *message, CustomData *data) {
   JNIEnv *env = get_jni_env ();
+  //TODO
   GST_DEBUG ("Setting message to: %s", message);
   jstring jmessage = (*env)->NewStringUTF(env, message);
   (*env)->CallVoidMethod (env, data->app, set_message_method_id, jmessage);
@@ -111,11 +112,13 @@ static void error_cb (GstBus *bus, GstMessage *msg, CustomData *data) {
 }
 
 /* Notify UI about pipeline state changes */
+//TODO 管道状态改变时上方显示texView
 static void state_changed_cb (GstBus *bus, GstMessage *msg, CustomData *data) {
   GstState old_state, new_state, pending_state;
   gst_message_parse_state_changed (msg, &old_state, &new_state, &pending_state);
   /* Only pay attention to messages coming from the pipeline, not its children */
   if (GST_MESSAGE_SRC (msg) == GST_OBJECT (data->pipeline)) {
+
     gchar *message = g_strdup_printf("State changed to %s", gst_element_state_get_name(new_state));
     set_ui_message(message, data);
     g_free (message);
@@ -161,7 +164,8 @@ static void *app_function (void *userdata) {
   //data->pipeline = gst_parse_launch("udpsrc port=1111 caps=\"application/x-rtp, payload=127\"  !  rtph264depay ! h264parse  ! openh264dec ! autovideosink sync=false udpsrc port=2222 caps=\"application/x-rtp, media=(string)audio, clock-rate=(int)44100, encoding-name=(string)L16, encoding-params=(string)1, channels=(int)1, payload=(int)96\" ! rtpL16depay ! audioconvert ! audioresample ! autoaudiosink ", &error);
  // data->pipeline = gst_parse_launch("udpsrc port=1111 ! application/x-rtp, payload=96 ! rtpjitterbuffer ! rtph264depay ! avdec_h264 ! fpsdisplaysink sync=false text-overlay=false udpsrc port=2222 caps = \"application/x-rtp\" ! queue ! rtppcmudepay ! mulawdec ! alsasink", &error);
 //Pause的管道 // data->pipeline = gst_parse_launch("udpsrc port=5000 ! queue2 max-size-buffers=1 ! decodebin ! autovideosink sync=false udpsrc port=5555 caps=\"application/x-rtp, media=(string)audio, clock-rate=(int)44100, encoding-name=(string)L16, encoding-params=(string)1, channels=(int)1, payload=(int)96\" ! rtpL16depay ! audioconvert ! audioresample ! autoaudiosink",&error);
-data->pipeline = gst_parse_launch("udpsrc port=5000 ! application/x-rtp, payload=96 ! rtpjitterbuffer ! rtph264depay ! avdec_h264 ! fpsdisplaysink sync=false text-overlay=false udpsrc port=5555 caps=\"application/x-rtp, media=(string)audio, clock-rate=(int)44100, encoding-name=(string)L16, encoding-params=(string)1, channels=(int)1, payload=(int)96\" ! rtpL16depay ! audioconvert ! audioresample ! autoaudiosink",&error);
+//data->pipeline = gst_parse_launch("udpsrc port=5000 ! application/x-rtp, payload=96 ! rtpjitterbuffer ! rtph264depay ! avdec_h264 ! fpsdisplaysink sync=false text-overlay=false udpsrc port=5555 caps=\"application/x-rtp, media=(string)audio, clock-rate=(int)44100, encoding-name=(string)L16, encoding-params=(string)1, channels=(int)1, payload=(int)96\" ! rtpL16depay ! audioconvert ! audioresample ! autoaudiosink",&error);
+data->pipeline = gst_parse_launch("udpsrc port=5000 caps=\"application/x-rtp,media=(string)video,clock-rate=(int)90000,encoding-name=(string)H264\" !  rtph264depay ! avdec_h264!videoconvert ! autovideosink sync=false udpsrc port=5555 caps=\"application/x-rtp, media=(string)audio, clock-rate=(int)44100, encoding-name=(string)L16, encoding-params=(string)1, channels=(int)1, payload=(int)96\" ! rtpL16depay ! audioconvert ! audioresample ! autoaudiosink",&error);
 
   if (error) {
     gchar *message = g_strdup_printf("Unable to build pipeline: %s", error->message);

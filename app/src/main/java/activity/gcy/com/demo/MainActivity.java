@@ -419,13 +419,13 @@ public class MainActivity extends Activity {
             public void onClick(View v) {
 
                 ProgressDialog progressDialog = new ProgressDialog(MainActivity.this);
-                new Thread(new HttpThread("VIDEO_START")).start();
+           //     new Thread(new HttpThread("VIDEO_START")).start();
 
                 new Thread(new HttpGetVideoIPThread(MainActivity.this,progressDialog,false,temporaryData)).start();
-                progressDialog.setTitle("请稍后...");
+      /*          progressDialog.setTitle("请稍后...");
                 progressDialog.setMessage("正在获取IP中...");
                 progressDialog.setCancelable(true);
-                progressDialog.show();
+                progressDialog.show();*/
 
 
 
