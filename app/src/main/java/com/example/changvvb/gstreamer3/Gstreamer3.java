@@ -92,16 +92,16 @@ public class Gstreamer3 extends Activity implements SurfaceHolder.Callback {
                         bx = event.getX();
                         by = event.getY();
                         if((by-ay)>(bx-ax)&&(by-ay)>(ax-bx)&&(by-ay)>50){
-                            //new Thread(new HttpThread("CAMERA UP")).start();
+                            new Thread(new HttpThread("CAMERA UP")).start();
                         }
                         if((ay-by)>(bx-ax)&&(ay-by)>(ax-bx)&&(by-ay)<-50){
-                            //new Thread(new HttpThread("CAMERA DOWN")).start();
+                            new Thread(new HttpThread("CAMERA DOWN")).start();
                         }
                         if((bx-ax)>(ay-by)&&(bx-ax)>(by-ay)&&(bx-ax)>50){
-                            //new Thread(new HttpThread("CAMERA LEFT")).start();
+                            new Thread(new HttpThread("CAMERA LEFT")).start();
                         }
                         if((ax-bx)>(ay-by)&&(ax-bx)>(by-ay)&&(bx-ax)<-50){
-                            //new Thread(new HttpThread("CAMERA RIGHT")).start();
+                            new Thread(new HttpThread("CAMERA RIGHT")).start();
                         }
 
 

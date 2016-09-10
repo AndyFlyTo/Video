@@ -9,7 +9,7 @@ import java.util.List;
  * Created by Mr.G on 2016/5/15.
  */
 public class Config {
-    public static String URL = "http://121.42.62.140:80/server/phone.do";
+    public static String URL = "http://121.42.62.140:80/video/phone.do";
 
 
 

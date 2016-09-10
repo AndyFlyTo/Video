@@ -59,11 +59,10 @@ public class HttpGetVideoIPThread implements Runnable {
                 conn.connect();
 
 
-              //  BufferedWriter bw  = new BufferedWriter(new OutputStreamWriter(conn.getOutputStream()));
-
-            //    bw.write("SEND_IP_TO_ME");
-                //bw.flush();
-                //bw.close();
+                BufferedWriter bw  = new BufferedWriter(new OutputStreamWriter(conn.getOutputStream()));
+                bw.write("get_ip hjy");
+                bw.flush();
+                bw.close();
                 if (conn.getResponseCode()==200) {
                     BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
                     String str1;
@@ -79,12 +78,13 @@ public class HttpGetVideoIPThread implements Runnable {
                     conn.disconnect();
                 flag = false;
 
-                Log.d("chen","跳转到视频");
+                //Log.d("chen","跳转到视频");
                 //TODO
-                Intent intent = new Intent(activity, Gstreamer3.class);
+                Intent intent = new Intent(activity, Gstreamer_test2.class);
                 if(activityOrService)
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 intent.putExtra(IntentKeyString.REMOTE_VIDEO_IP,message);
+                Log.d("chen","message:"+message);
                 activity.startActivity(intent);
 
                 /*if(!message.equals("NO_DEVICE")){

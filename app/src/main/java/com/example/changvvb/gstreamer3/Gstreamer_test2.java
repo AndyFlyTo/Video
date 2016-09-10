@@ -12,6 +12,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.gcy.beans.IntentKeyString;
+import com.gcy.beans.TemporaryData;
 
 
 import org.freedesktop.gstreamer.GStreamer;
@@ -53,7 +54,10 @@ public class Gstreamer_test2 extends Activity {
         setContentView(R.layout.main_ttt);
 
 
-        String remoteIP = getIntent().getExtras().getString(IntentKeyString.REMOTE_VIDEO_IP,"192.168.1.1");
+        String remoteIP = getIntent().getExtras().getString(IntentKeyString.REMOTE_VIDEO_IP);
+
+      //  String remoteIp= TemporaryData.getInstance().getIP();
+        Log.d("chen",remoteIP+"sendsound");
 
         if(remoteIP!=null){
             String str[] = remoteIP.split("\\.");
@@ -63,7 +67,7 @@ public class Gstreamer_test2 extends Activity {
                 ip2 = Integer.parseInt(str[1]);
                 ip3 = Integer.parseInt(str[2]);
                 ip4 = Integer.parseInt(str[3]);
-                Log.e("IP地址：",ip1+"."+ip2+"."+ip3+"."+ip4);
+                Log.d("chen","sendsound中ip地址"+ip1+"."+ip2+"."+ip3+"."+ip4);
             }
 
 
@@ -110,7 +114,9 @@ public class Gstreamer_test2 extends Activity {
 
         Toast.makeText(Gstreamer_test2.this,remoteIP, Toast.LENGTH_SHORT).show();
 
-        Intent intent = new Intent(Gstreamer_test2.this,Gstreamer3.class);
+        //TODO 成功后自动跳转到gstreamer3.java
+       Intent intent = new Intent(Gstreamer_test2.this,Gstreamer3.class);
+        Log.d("chen","跳转到视频");
         startActivityForResult(intent,1);
 
     }

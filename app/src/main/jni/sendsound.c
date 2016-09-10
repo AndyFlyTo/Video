@@ -121,12 +121,13 @@ static void error_cb (GstBus *bus, GstMessage *msg, CustomData *data) {
 }
 
 /* Notify UI about pipeline state changes */
+//TODO 管道状态
 static void state_changed_cb (GstBus *bus, GstMessage *msg, CustomData *data) {
   GstState old_state, new_state, pending_state;
   gst_message_parse_state_changed (msg, &old_state, &new_state, &pending_state);
   /* Only pay attention to messages coming from the pipeline, not its children */
   if (GST_MESSAGE_SRC (msg) == GST_OBJECT (data->pipeline)) {
-    gchar *message = g_strdup_printf("State changed to %s", gst_element_state_get_name(new_state));
+    gchar *message = g_strdup_printf(" Sound State changed to %s", gst_element_state_get_name(new_state));
     set_ui_message(message, data);
     g_free (message);
   }
@@ -165,6 +166,7 @@ static void *app_function (void *userdata) {
   //openslessrc ! audioconvert ! rtpL16pay ! udpsink host=172.18.208.71 port=1111"
   char pipeline_str_buf[256];
   sprintf(pipeline_str_buf,"openslessrc name=audiosrc ! queue ! audioconvert ! audioresample ! audio/x-raw,channels=1,rate=44100 ! audioconvert ! rtpL16pay !  udpsink host=%d.%d.%d.%d port=1111",number1,number2,number3,number4);
+  //sprintf(pipeline_str_buf,"openslessrc ! queue ! audioconvert ! audioresample ! audio/x-raw-int, channels=1, rate=16000 ! audioconvert ! rtpL16pay ! udpsink host=%d.%d.%d.%d port=1111",number1,number2,number3,number4,&error);
   GST_DEBUG("%s\n",pipeline_str_buf);
   data->pipeline = gst_parse_launch(pipeline_str_buf, &error);
 
