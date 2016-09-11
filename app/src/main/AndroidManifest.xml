@@ -15,36 +15,31 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".LoginActivity">
+  <!--      <activity android:name=".LoginActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
-        </activity>
-        <activity android:name=".MainActivity">
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-
-                <data
+        </activity>-->
+        <activity android:name=".MainActivity"
+            android:label="@string/app_name"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar">
+                <intent-filter>
+                    <action android:name="android.intent.action.MAIN" />
+                    <category android:name="android.intent.category.LAUNCHER" />
+                </intent-filter>
+                <!--<data
                     android:host="my.com"
-                    android:scheme="m" />
-            </intent-filter>
+                    android:scheme="m" />-->
         </activity>
         <activity android:name=".MainNewApplicansActivity"></activity>
-        <activity android:name=".EnvironmentActivity"></activity>
 
         <service android:name="com.gcy.thread.HttpService"></service>
 
         <activity android:name="com.example.changvvb.gstreamer3.Gstreamer3"></activity>
         <activity android:name=".ConfigActivity"></activity>
         <activity android:name="com.example.changvvb.gstreamer3.Gstreamer_test2"></activity>
-        <activity android:name=".ApplicansLampActivity"></activity>
-        <activity android:name=".ApplicansWaterActivity"></activity>
-        <activity android:name=".ApplicansFanActivity"></activity>
-        <activity android:name=".ApplicansChatActivity"></activity>
     </application>
 
 </manifest>

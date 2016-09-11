@@ -1,8 +1,22 @@
 <resources>
-    <string name="app_name">SmartHomeAndroid</string>
-    <string name="button_play">Play</string>
-    <string name="button_stop">Stop</string>
     <string name="dialog_default_title">Here\'s a message!</string>
     <string name="dialog_ok">OK</string>
     <string name="dialog_cancel">Cancel</string>
+
+
+    <string name="app_name">VideoProject</string>
+    <string name="action_settings">Settings</string>
+
+
+    <string name="btn_open_video">打开视频</string>
+    <string name="button_play">Play</string>
+    <string name="button_stop">Stop</string>
+
+    <!--title-->
+    <string name="title_open_video">请稍候……</string>
+
+    <!--dialog中message-->
+    <string name="dialog_open_video">正在获取IP中……</string>
+
+    <!--toast-->
 </resources>

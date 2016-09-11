@@ -29,15 +29,15 @@ import confige.Config;
  */
 public class HttpGetVideoIPThread implements Runnable {
     private String message="null";
-    private ProgressDialog progressDialog;
+  //  private ProgressDialog progressDialog;
     private Context activity;
     private boolean activityOrService;     //Service启动activity需要加标志位   如果是服务 该标志位为true
     private TemporaryData td;
 
-    public HttpGetVideoIPThread(Context activity,ProgressDialog progressDialog,boolean activityOrService,TemporaryData td){
+    public HttpGetVideoIPThread(Context activity,boolean activityOrService,TemporaryData td){
         this.activity = activity;
         this.activityOrService = activityOrService;
-        this.progressDialog = progressDialog;
+      //  this.progressDialog = progressDialog;
         this.td = td ;
     }
 
@@ -45,7 +45,7 @@ public class HttpGetVideoIPThread implements Runnable {
     @Override
     public void run() {
         boolean flag = true;
-        int count = 0;
+     //   int count = 0;
         while(flag)
             try {
 
@@ -71,6 +71,7 @@ public class HttpGetVideoIPThread implements Runnable {
                         message=str1;
                     }
                     td.setIP(message);
+                    Log.d("chen","发送请求获取message");
 
                     reader.close();
                 }
@@ -78,8 +79,7 @@ public class HttpGetVideoIPThread implements Runnable {
                     conn.disconnect();
                 flag = false;
 
-                //Log.d("chen","跳转到视频");
-                //TODO
+                //TODO 跳转音频
                 Intent intent = new Intent(activity, Gstreamer_test2.class);
                 if(activityOrService)
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -126,9 +126,6 @@ public class HttpGetVideoIPThread implements Runnable {
                 }
 
 */
-
-
-
 
             } catch (MalformedURLException e) {
                 e.printStackTrace();
