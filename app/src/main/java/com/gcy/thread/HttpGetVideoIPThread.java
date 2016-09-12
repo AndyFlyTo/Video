@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 
+import com.afollestad.materialdialogs.MaterialDialog;
 import com.example.changvvb.gstreamer3.Gstreamer3;
 import com.example.changvvb.gstreamer3.Gstreamer_test2;
 import com.gcy.beans.IntentKeyString;
@@ -23,22 +24,21 @@ import confige.Config;
 
 /**
  * Created by Mr.G on 2016/5/26.
- *
+ * <p/>
  * 向服务器发送消息
- *
  */
 public class HttpGetVideoIPThread implements Runnable {
-    private String message="null";
-    private ProgressDialog progressDialog;
+    private String message = "null";
+    private MaterialDialog progressDialog;
     private Context activity;
     private boolean activityOrService;     //Service启动activity需要加标志位   如果是服务 该标志位为true
     private TemporaryData td;
 
-    public HttpGetVideoIPThread(Context activity,ProgressDialog progressDialog,boolean activityOrService,TemporaryData td){
+    public HttpGetVideoIPThread(Context activity, MaterialDialog progressDialog, boolean activityOrService, TemporaryData td) {
         this.activity = activity;
         this.activityOrService = activityOrService;
         this.progressDialog = progressDialog;
-        this.td = td ;
+        this.td = td;
     }
 
 
@@ -46,7 +46,7 @@ public class HttpGetVideoIPThread implements Runnable {
     public void run() {
         boolean flag = true;
         int count = 0;
-        while(flag)
+        while (flag)
             try {
 
                 URL httpUrl = new URL(Config.URL);
@@ -59,32 +59,33 @@ public class HttpGetVideoIPThread implements Runnable {
                 conn.connect();
 
 
-                BufferedWriter bw  = new BufferedWriter(new OutputStreamWriter(conn.getOutputStream()));
+                BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(conn.getOutputStream()));
                 bw.write("get_ip hjy");
                 bw.flush();
                 bw.close();
-                if (conn.getResponseCode()==200) {
+                if (conn.getResponseCode() == 200) {
+                    progressDialog.dismiss();
                     BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
                     String str1;
 
                     while ((str1 = reader.readLine()) != null) {
-                        message=str1;
+                        message = str1;
                     }
                     td.setIP(message);
 
                     reader.close();
                 }
 
-                    conn.disconnect();
+                conn.disconnect();
                 flag = false;
 
                 //Log.d("chen","跳转到视频");
                 //TODO
                 Intent intent = new Intent(activity, Gstreamer_test2.class);
-                if(activityOrService)
+                if (activityOrService)
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                intent.putExtra(IntentKeyString.REMOTE_VIDEO_IP,message);
-                Log.d("chen","message:"+message);
+                intent.putExtra(IntentKeyString.REMOTE_VIDEO_IP, message);
+                Log.d("chen", "message:" + message);
                 activity.startActivity(intent);
 
                 /*if(!message.equals("NO_DEVICE")){
@@ -128,8 +129,6 @@ public class HttpGetVideoIPThread implements Runnable {
 */
 
 
-
-
             } catch (MalformedURLException e) {
                 e.printStackTrace();
             } catch (IOException e) {
@@ -137,7 +136,6 @@ public class HttpGetVideoIPThread implements Runnable {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-
 
 
     }

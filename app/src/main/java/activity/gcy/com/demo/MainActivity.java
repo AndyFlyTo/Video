@@ -10,10 +10,17 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -27,6 +34,7 @@ import android.widget.TabHost;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.afollestad.materialdialogs.MaterialDialog;
 import com.gcy.adapter.MyappliancesAdapter;
 import com.gcy.adapter.MyappliancesEnvironmentAdapter;
 import com.gcy.beans.IntentKeyString;
@@ -40,13 +48,128 @@ import com.gcy.util.UnusualNumerical;
 import com.gcy.view.CrossView;
 import com.gcy.view.SlidingMenu;
 import com.gcy.view.TitleBar;
+import com.romainpiel.shimmer.Shimmer;
+import com.romainpiel.shimmer.ShimmerTextView;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import confige.Config;
 
+public class MainActivity extends AppCompatActivity {
 
+    private Button openVideoBtn;
+    private TextView nameText;
+    private ShimmerTextView shimmerTextView;
+    private Shimmer shimmer;
+    private TemporaryData temporaryData;
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main_main);
+        temporaryData=TemporaryData.getInstance();
+        Intent serviceIntent=new Intent(this, HttpService.class);
+        startService(serviceIntent);
+
+
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+                        .setAction("Action", null).show();
+            }
+        });
+
+        shimmerTextView=(ShimmerTextView)findViewById(R.id.shimmer_tv);
+        shimmer = new Shimmer();
+        shimmer.start(shimmerTextView);
+
+
+        openVideoBtn=(Button)findViewById(R.id.btn_open_video);
+
+        openVideoBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+//                Intent intent = new Intent(MainActivity.this, Gstreamer3.class);
+//                startActivity(intent);
+                MaterialDialog dialog=new MaterialDialog.Builder(MainActivity.this)
+                        .title(R.string.title_open_video)
+                        .content(R.string.dialog_open_video)
+                        .progress(true, 100)
+                        .show();
+//
+////                new Thread(new HttpThread("VIDEO_START")).start();
+//
+//                Log.d("chen","openVideoBtn");
+                new Thread(new HttpGetVideoIPThread(MainActivity.this,dialog,false,temporaryData)).start();
+            }
+        });
+
+
+    }
+
+    //字体闪烁
+    public int clo=0;
+    public void spark(){
+        nameText=(TextView)findViewById(R.id.text_name);
+        Timer timer=new Timer();
+        TimerTask taskcc = new TimerTask(){
+            public void run() {
+                runOnUiThread(new Runnable() {
+                    public void run() {
+                        if (clo == 0) {
+                            clo = 1;
+                            nameText.setTextColor(Color.TRANSPARENT); // 透明
+                        } else {
+                            if (clo == 1) {
+                                clo = 2;
+                                nameText.setTextColor(Color.RED);
+                            } else {
+                                clo = 0;
+                                nameText.setTextColor(Color.GREEN);
+                            }
+                        }
+                    }
+                });
+            }
+        };
+        timer.schedule(taskcc, 1, 300);
+        // 参数分别是delay（多长时间后执行），duration（执行间隔）
+    }
+
+   /* @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        //noinspection SimplifiableIfStatement
+        if (id == R.id.action_settings) {
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }*/
+}
+
+
+
+
+/*
 public class MainActivity extends Activity {
     private TabHost tabHost;
     private TitleBar titleBar;
@@ -80,7 +203,11 @@ public class MainActivity extends Activity {
     private List<Myappliances> myappliancesesListClone;
 
 
-    /********    tab2     ******/
+    */
+/********
+     * tab2
+     ******//*
+
     private ListView main_tap_environment_listiew;
     private MyappliancesEnvironmentAdapter environment_adapter;
     private List<String> mDataList;
@@ -125,7 +252,7 @@ public class MainActivity extends Activity {
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_main_layout);
 
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT){        //全屏显示，通知栏背景设置
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {        //全屏显示，通知栏背景设置
             getWindow().addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
             getWindow().addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION);
         }
@@ -139,11 +266,11 @@ public class MainActivity extends Activity {
 
 
         //环境标准值
-        tempStandard = PreferenceUtil.load(context,"tempStandard",Config.TEMPERATURE_STANDARD);
-        humiStandard = PreferenceUtil.load(context,"humiStandard",Config.HUMIDITY_STANDARD);
-        waterStandard = PreferenceUtil.load(context,"waterStandard",Config.WATER_STANDARD);
-        pm2_5Standard = PreferenceUtil.load(context,"pm2_5Standard",Config.PM2_5_STANDARD);
-        dangStandard = PreferenceUtil.load(context,"dangStandard",Config.DANGEROUS_GAS_STANDARD);
+        tempStandard = PreferenceUtil.load(context, "tempStandard", Config.TEMPERATURE_STANDARD);
+        humiStandard = PreferenceUtil.load(context, "humiStandard", Config.HUMIDITY_STANDARD);
+        waterStandard = PreferenceUtil.load(context, "waterStandard", Config.WATER_STANDARD);
+        pm2_5Standard = PreferenceUtil.load(context, "pm2_5Standard", Config.PM2_5_STANDARD);
+        dangStandard = PreferenceUtil.load(context, "dangStandard", Config.DANGEROUS_GAS_STANDARD);
 
         mStandardList = new ArrayList<>();          //环境参数标准值
 
@@ -153,20 +280,19 @@ public class MainActivity extends Activity {
         mStandardList.add(pm2_5Standard);
         mStandardList.add(dangStandard);
 
-        Intent bindIntent = new Intent(this,HttpService.class);//绑定服务
-        bindService(bindIntent,conn,BIND_AUTO_CREATE);
-
+        Intent bindIntent = new Intent(this, HttpService.class);//绑定服务
+        bindService(bindIntent, conn, BIND_AUTO_CREATE);
 
 
         intentFilter = new IntentFilter();  //绑定接收广播
         intentFilter.addAction("com.smartHome.demo.GET_DATA");
         mr = new mReceive();
 
-        registerReceiver(mr,intentFilter);
+        registerReceiver(mr, intentFilter);
 
         initViewGroup();
         mLampList = new ArrayList<String>();
-        serviceIntent = new Intent(this,HttpService.class);
+        serviceIntent = new Intent(this, HttpService.class);
         startService(serviceIntent);
 
 
@@ -174,7 +300,7 @@ public class MainActivity extends Activity {
         myappliancesesList = new ArrayList<Myappliances>();
 
         myappliancesesListClone = new ArrayList<>();
-        for (int i=0;i<Config.getApplicancesList().size();i++) {
+        for (int i = 0; i < Config.getApplicancesList().size(); i++) {
             myappliancesesList.add(Config.getApplicancesList().get(i));
             myappliancesesListClone.add(Config.getApplicancesList().get(i));
 
@@ -196,19 +322,16 @@ public class MainActivity extends Activity {
         myappliancesesListClone.add(mpFan);
 
 
-
-        adapter = new MyappliancesAdapter(context,R.layout.activity_myappliance_item,myappliancesesListClone);
-        environment_adapter = new MyappliancesEnvironmentAdapter(context,R.layout.activity_myappliance_environment_item,myappliancesesList);
+        adapter = new MyappliancesAdapter(context, R.layout.activity_myappliance_item, myappliancesesListClone);
+        environment_adapter = new MyappliancesEnvironmentAdapter(context, R.layout.activity_myappliance_environment_item, myappliancesesList);
         myApplianceListView.setAdapter(adapter);
 
 
-
-        tabHost = (TabHost)findViewById(R.id.tabHost);
+        tabHost = (TabHost) findViewById(R.id.tabHost);
         tabHost.setup();
-        tabHost.addTab(tabHost.newTabSpec("tab1").setIndicator("我的设备",getResources().getDrawable(R.mipmap.ic_launcher)).setContent(R.id.tab1));
-        tabHost.addTab(tabHost.newTabSpec("tab2").setIndicator("环境卫生",getResources().getDrawable(R.mipmap.ic_launcher)).setContent(R.id.tab2));
-        tabHost.addTab(tabHost.newTabSpec("tab3").setIndicator("视频对讲",getResources().getDrawable(R.mipmap.ic_launcher)).setContent(R.id.tab3));
-
+        tabHost.addTab(tabHost.newTabSpec("tab1").setIndicator("我的设备", getResources().getDrawable(R.mipmap.ic_launcher)).setContent(R.id.tab1));
+        tabHost.addTab(tabHost.newTabSpec("tab2").setIndicator("环境卫生", getResources().getDrawable(R.mipmap.ic_launcher)).setContent(R.id.tab2));
+        tabHost.addTab(tabHost.newTabSpec("tab3").setIndicator("视频对讲", getResources().getDrawable(R.mipmap.ic_launcher)).setContent(R.id.tab3));
 
 
         tabHost.setOnTabChangedListener(new TabHost.OnTabChangeListener() {
@@ -226,7 +349,7 @@ public class MainActivity extends Activity {
         innerTest.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
-                Intent intent = new Intent(MainActivity.this,ApplicansChatActivity.class);
+                Intent intent = new Intent(MainActivity.this, ApplicansChatActivity.class);
                 startActivity(intent);
                 return false;
             }
@@ -257,14 +380,10 @@ public class MainActivity extends Activity {
         });
 
 
-
-
-
-
-        ///***********************************tab事件
+        //*/
+/***********************************tab事件
 
         myappliances_add.setVisibility(View.GONE);
-
 
 
         myApplianceListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -272,14 +391,15 @@ public class MainActivity extends Activity {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
                 //水温
-                if(position==2) {
+                if (position == 2) {
 
                     if (TEMP == null) {
                         Toast.makeText(MainActivity.this, "连接服务器失败！请检查网络！", Toast.LENGTH_SHORT).show();
-                        return ;}
-                    if(TEMP.equals("null")){
+                        return;
+                    }
+                    if (TEMP.equals("null")) {
                         Toast.makeText(MainActivity.this, "设备离线！", Toast.LENGTH_SHORT).show();
-                        return ;
+                        return;
                     }
                     Intent intent = new Intent(MainActivity.this, ApplicansWaterActivity.class);
                     intent.putExtra(IntentKeyString.ENVIRONMENT_TEMP, TEMP);
@@ -288,25 +408,26 @@ public class MainActivity extends Activity {
 
 
                 //灯
-                if(position==5){
-                    Intent intent = new Intent(MainActivity.this,ApplicansLampActivity.class);
-                    if(mLampList==null){
+                if (position == 5) {
+                    Intent intent = new Intent(MainActivity.this, ApplicansLampActivity.class);
+                    if (mLampList == null) {
                         Toast.makeText(MainActivity.this, "无服务器连接请检查网络！", Toast.LENGTH_SHORT).show();
-                        return;}
-                    if(mLampList.size()!=4){
-                        intent.putExtra("lamp1","1");
-                        intent.putExtra("lamp2","1");
-                        intent.putExtra("lamp3","1");
-                        intent.putExtra("lamp4","1");
-                        intent.putExtra("online",false);
+                        return;
+                    }
+                    if (mLampList.size() != 4) {
+                        intent.putExtra("lamp1", "1");
+                        intent.putExtra("lamp2", "1");
+                        intent.putExtra("lamp3", "1");
+                        intent.putExtra("lamp4", "1");
+                        intent.putExtra("online", false);
                         Toast.makeText(MainActivity.this, "获取数据失败请检查网络！", Toast.LENGTH_SHORT).show();
-                    }else{
+                    } else {
 
-                        intent.putExtra("lamp1",mLampList.get(0));
-                        intent.putExtra("lamp2",mLampList.get(1));
-                        intent.putExtra("lamp3",mLampList.get(2));
-                        intent.putExtra("lamp4",mLampList.get(3));
-                        intent.putExtra("online",true);
+                        intent.putExtra("lamp1", mLampList.get(0));
+                        intent.putExtra("lamp2", mLampList.get(1));
+                        intent.putExtra("lamp3", mLampList.get(2));
+                        intent.putExtra("lamp4", mLampList.get(3));
+                        intent.putExtra("online", true);
                     }
 
                     startActivity(intent);
@@ -315,15 +436,13 @@ public class MainActivity extends Activity {
                 }
 
                 //风扇
-                if(position==6){
-                    Intent intent = new Intent(MainActivity.this,ApplicansFanActivity.class);
+                if (position == 6) {
+                    Intent intent = new Intent(MainActivity.this, ApplicansFanActivity.class);
 
                     startActivity(intent);
 
 
-
                 }
-
 
 
             }
@@ -332,7 +451,7 @@ public class MainActivity extends Activity {
         titleBar.setOnTitleBarClickListener(new TitleBar.OnTitleBarClickListener() {
             @Override
             public void onLeftButtonClick(View v) {
-                if(titleBar.getActionView().equals("back"))
+                if (titleBar.getActionView().equals("back"))
                     sliding_menu.openMenu();
                 else
                     sliding_menu.closeMenu();
@@ -345,16 +464,13 @@ public class MainActivity extends Activity {
         });
 
 
-
-
-
         //  监测频率设置
         config_frequency.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this,ConfigActivity.class);
-                intent.putExtra(IntentKeyString.CONFIG_INTENT_KEY,IntentKeyString.CONFIG_INTENT_KEY_CONFIG_FREQUENCY);
-                startActivityForResult(intent,1);
+                Intent intent = new Intent(MainActivity.this, ConfigActivity.class);
+                intent.putExtra(IntentKeyString.CONFIG_INTENT_KEY, IntentKeyString.CONFIG_INTENT_KEY_CONFIG_FREQUENCY);
+                startActivityForResult(intent, 1);
             }
         });
 
@@ -363,14 +479,14 @@ public class MainActivity extends Activity {
         applican_standard.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this,ConfigActivity.class);
-                intent.putExtra(IntentKeyString.CONFIG_INTENT_KEY,IntentKeyString.CONFIG_INTENT_KEY_APPLICANS_STANDARD);
-                intent.putExtra("tempStandard",tempStandard);
-                intent.putExtra("humiStandard",humiStandard);
-                intent.putExtra("waterStandard",waterStandard);
-                intent.putExtra("pm2_5Standard",pm2_5Standard);
-                intent.putExtra("dangStandard",dangStandard);
-                startActivityForResult(intent,2);
+                Intent intent = new Intent(MainActivity.this, ConfigActivity.class);
+                intent.putExtra(IntentKeyString.CONFIG_INTENT_KEY, IntentKeyString.CONFIG_INTENT_KEY_APPLICANS_STANDARD);
+                intent.putExtra("tempStandard", tempStandard);
+                intent.putExtra("humiStandard", humiStandard);
+                intent.putExtra("waterStandard", waterStandard);
+                intent.putExtra("pm2_5Standard", pm2_5Standard);
+                intent.putExtra("dangStandard", dangStandard);
+                startActivityForResult(intent, 2);
             }
         });
 
@@ -379,11 +495,11 @@ public class MainActivity extends Activity {
         stop_monitoring.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(stop_monitoring_text.getText().toString().equals("停止监测")){
+                if (stop_monitoring_text.getText().toString().equals("停止监测")) {
 
                     mBinder.startMonitoring(false);
-                    stop_monitoring_text.setText("开始监测");}
-                else{
+                    stop_monitoring_text.setText("开始监测");
+                } else {
                     mBinder.startMonitoring(true);
                     stop_monitoring_text.setText("停止监测");
                 }
@@ -394,15 +510,14 @@ public class MainActivity extends Activity {
         about_us.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this,ConfigActivity.class);
-                intent.putExtra(IntentKeyString.CONFIG_INTENT_KEY,IntentKeyString.CONFIG_INTENT_KEY_ABOUT_US);
+                Intent intent = new Intent(MainActivity.this, ConfigActivity.class);
+                intent.putExtra(IntentKeyString.CONFIG_INTENT_KEY, IntentKeyString.CONFIG_INTENT_KEY_ABOUT_US);
                 startActivity(intent);
             }
         });
 
 
         main_tap_environment_listiew.setAdapter(environment_adapter);
-
 
 
         main_tap_environment_listiew.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -413,19 +528,20 @@ public class MainActivity extends Activity {
         });
 
 
-            //打开视频！
+        //打开视频！
         openVideo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
                 ProgressDialog progressDialog = new ProgressDialog(MainActivity.this);
-           //     new Thread(new HttpThread("VIDEO_START")).start();
+                //     new Thread(new HttpThread("VIDEO_START")).start();
 
-                new Thread(new HttpGetVideoIPThread(MainActivity.this,progressDialog,false,temporaryData)).start();
-      /*          progressDialog.setTitle("请稍后...");
+                new Thread(new HttpGetVideoIPThread(MainActivity.this, progressDialog, false, temporaryData)).start();
+      */
+/*          progressDialog.setTitle("请稍后...");
                 progressDialog.setMessage("正在获取IP中...");
                 progressDialog.setCancelable(true);
-                progressDialog.show();*/
+                progressDialog.show();*//*
 
 
 
@@ -435,12 +551,12 @@ public class MainActivity extends Activity {
         noDisturb.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(noDisturbStatus.getText().toString().equals("关闭")){
+                if (noDisturbStatus.getText().toString().equals("关闭")) {
                     crossView.toggle(500);
                     mBinder.setReadyToVideo(false);
                     noDisturbStatus.setText("开启");
 
-                }else{
+                } else {
                     crossView.toggle(500);
                     mBinder.setReadyToVideo(true);
                     noDisturbStatus.setText("关闭");
@@ -451,24 +567,23 @@ public class MainActivity extends Activity {
         });
 
 
-
     }
 
     private void initViewGroup() {
 
         titleBar = (TitleBar) findViewById(R.id.title_bar);
-        sliding_menu =(SlidingMenu) findViewById(R.id.sliding_menu);
-        titleBar.initTitleBarInfo("",-1,-1,"","");
+        sliding_menu = (SlidingMenu) findViewById(R.id.sliding_menu);
+        titleBar.initTitleBarInfo("", -1, -1, "", "");
         titleBar.setLeftContainerClickAble(true);
-        main_tap_myappliances = (LinearLayout)findViewById(R.id.main_tap_myappliances);
-        main_tap_environment = (LinearLayout)findViewById(R.id.main_tap_environment);
-        main_tap_chat = (LinearLayout)findViewById(R.id.main_tap_chat);
-        view2 =(ImageView) findViewById(R.id.main_tap_environment_image);
-        view3 =(ImageView) findViewById(R.id.main_tap_chat_image);
-        view1 =(ImageView) findViewById(R.id.main_tap_myappliances_image);
+        main_tap_myappliances = (LinearLayout) findViewById(R.id.main_tap_myappliances);
+        main_tap_environment = (LinearLayout) findViewById(R.id.main_tap_environment);
+        main_tap_chat = (LinearLayout) findViewById(R.id.main_tap_chat);
+        view2 = (ImageView) findViewById(R.id.main_tap_environment_image);
+        view3 = (ImageView) findViewById(R.id.main_tap_chat_image);
+        view1 = (ImageView) findViewById(R.id.main_tap_myappliances_image);
 
-        myappliances_add = (CrossView)findViewById(R.id.layout_myappliances_button_add);
-        myApplianceListView = (ListView)findViewById(R.id.layout_myappliances_lv);
+        myappliances_add = (CrossView) findViewById(R.id.layout_myappliances_button_add);
+        myApplianceListView = (ListView) findViewById(R.id.layout_myappliances_lv);
 
         main_tap_environment_listiew = (ListView) findViewById(R.id.main_tap_environment_listiew);
 
@@ -478,9 +593,9 @@ public class MainActivity extends Activity {
         stop_monitoring = (RelativeLayout) findViewById(R.id.stop_monitoring);
         about_us = (RelativeLayout) findViewById(R.id.about_us);
 
-        openVideo = (Button)findViewById(R.id.layout_main_open_video);
-        noDisturb = (LinearLayout)findViewById(R.id.layout_main_no_video);
-        noDisturbStatus = (TextView)findViewById(R.id.layout_main_no_video_text) ;
+        openVideo = (Button) findViewById(R.id.layout_main_open_video);
+        noDisturb = (LinearLayout) findViewById(R.id.layout_main_no_video);
+        noDisturbStatus = (TextView) findViewById(R.id.layout_main_no_video_text);
         crossView = (CrossView) findViewById(R.id.layout_main_no_video_crossview);
         innerTest = (TextView) findViewById(R.id.inner_test);
 
@@ -488,24 +603,23 @@ public class MainActivity extends Activity {
 
     }
 
-    public void setCurrentTab(int id){
-        view2.setImageBitmap(BitmapFactory.decodeResource(getResources(),R.drawable.widget_bar_explore_nor));
-        view3.setImageBitmap(BitmapFactory.decodeResource(getResources(),R.drawable.widget_bar_me_nor));
-        view1.setImageBitmap(BitmapFactory.decodeResource(getResources(),R.drawable.widget_bar_news_nor));
-        switch (id){
+    public void setCurrentTab(int id) {
+        view2.setImageBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.widget_bar_explore_nor));
+        view3.setImageBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.widget_bar_me_nor));
+        view1.setImageBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.widget_bar_news_nor));
+        switch (id) {
             case 0:
-                view1.setImageBitmap(BitmapFactory.decodeResource(getResources(),R.drawable.widget_bar_news_over));
+                view1.setImageBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.widget_bar_news_over));
                 break;
             case 1:
-                view2.setImageBitmap(BitmapFactory.decodeResource(getResources(),R.drawable.widget_bar_explore_over));
+                view2.setImageBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.widget_bar_explore_over));
                 break;
             case 2:
-                view3.setImageBitmap(BitmapFactory.decodeResource(getResources(),R.drawable.widget_bar_me_over));
+                view3.setImageBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.widget_bar_me_over));
                 break;
 
         }
     }
-
 
 
     @Override
@@ -515,7 +629,7 @@ public class MainActivity extends Activity {
         super.onDestroy();
     }
 
-    class mReceive extends BroadcastReceiver{
+    class mReceive extends BroadcastReceiver {
 
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -524,7 +638,7 @@ public class MainActivity extends Activity {
             mDataList.clear();
 
             List<String> mBinderLamp = mBinder.getLampDataList();
-            for(int i=0;i<mBinderLamp.size();i++){
+            for (int i = 0; i < mBinderLamp.size(); i++) {
                 mLampList.add(mBinderLamp.get(i));
 
             }
@@ -533,9 +647,9 @@ public class MainActivity extends Activity {
             temporaryData.setmLampList(mLampList);
 
             List<String> mServiceDatalist = mBinder.getEnvironmentApplicansData();
-            if(mServiceDatalist.size()!=5)
+            if (mServiceDatalist.size() != 5)
                 return;
-            for(int i=0;i<mServiceDatalist.size();i++){
+            for (int i = 0; i < mServiceDatalist.size(); i++) {
                 mDataList.add(mServiceDatalist.get(i));
 
             }
@@ -546,10 +660,10 @@ public class MainActivity extends Activity {
                 public void run() {
 
 
-                    List<Boolean> isNormal= UnusualNumerical.isNumericalNormal(mDataList,mStandardList);
-                    for(int i=0;i<Config.getApplicancesList().size();i++){
+                    List<Boolean> isNormal = UnusualNumerical.isNumericalNormal(mDataList, mStandardList);
+                    for (int i = 0; i < Config.getApplicancesList().size(); i++) {
                         myappliancesesList.get(i).setApplicansValue(mDataList.get(i));
-                        if(!isNormal.get(i))
+                        if (!isNormal.get(i))
                             myappliancesesList.get(i).setNormal(false);
                         else
                             myappliancesesList.get(i).setNormal(true);
@@ -568,20 +682,20 @@ public class MainActivity extends Activity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 
-        if(resultCode==1){
+        if (resultCode == 1) {
             int frequency;
-            frequency=data.getIntExtra("MONITORING_FREQUENCY",Config.MONITORING_FREQUENCY);
+            frequency = data.getIntExtra("MONITORING_FREQUENCY", Config.MONITORING_FREQUENCY);
             mBinder.setMonitoringFrequency(frequency);
-            PreferenceUtil.save(context,"MONITORING_FREQUENCY",frequency);
+            PreferenceUtil.save(context, "MONITORING_FREQUENCY", frequency);
 
         }
-        if (resultCode==2){
+        if (resultCode == 2) {
 
-            tempStandard = data.getFloatExtra("tempStandard",Config.TEMPERATURE_STANDARD);
-            humiStandard = data.getFloatExtra("humiStandard",Config.HUMIDITY_STANDARD);
-            waterStandard = data.getFloatExtra("waterStandard",Config.WATER_STANDARD);
-            pm2_5Standard = data.getFloatExtra("pm2_5Standard",Config.PM2_5_STANDARD);
-            dangStandard = data.getFloatExtra("dangStandard",Config.DANGEROUS_GAS_STANDARD);
+            tempStandard = data.getFloatExtra("tempStandard", Config.TEMPERATURE_STANDARD);
+            humiStandard = data.getFloatExtra("humiStandard", Config.HUMIDITY_STANDARD);
+            waterStandard = data.getFloatExtra("waterStandard", Config.WATER_STANDARD);
+            pm2_5Standard = data.getFloatExtra("pm2_5Standard", Config.PM2_5_STANDARD);
+            dangStandard = data.getFloatExtra("dangStandard", Config.DANGEROUS_GAS_STANDARD);
 
 
             mStandardList.clear();
@@ -592,14 +706,13 @@ public class MainActivity extends Activity {
             mStandardList.add(pm2_5Standard);
             mStandardList.add(dangStandard);
 
-            PreferenceUtil.save(context,"tempStandard",tempStandard);
-            PreferenceUtil.save(context,"humiStandard",humiStandard);
-            PreferenceUtil.save(context,"waterStandard",waterStandard);
-            PreferenceUtil.save(context,"pm2_5Standard",pm2_5Standard);
-            PreferenceUtil.save(context,"dangStandard",dangStandard);
+            PreferenceUtil.save(context, "tempStandard", tempStandard);
+            PreferenceUtil.save(context, "humiStandard", humiStandard);
+            PreferenceUtil.save(context, "waterStandard", waterStandard);
+            PreferenceUtil.save(context, "pm2_5Standard", pm2_5Standard);
+            PreferenceUtil.save(context, "dangStandard", dangStandard);
 
             mBinder.setStandardConfig(mStandardList);
-
 
 
         }
@@ -608,4 +721,4 @@ public class MainActivity extends Activity {
 
 
 
-}
+}*/
