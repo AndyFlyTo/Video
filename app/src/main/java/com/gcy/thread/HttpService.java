@@ -157,11 +157,8 @@ public class HttpService extends Service {
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
-
-
                 }
                 while (isReadyToVideo) {
-
                     try {
                         Thread.sleep(5000);
                         URL httpUrl = new URL(Config.URL);

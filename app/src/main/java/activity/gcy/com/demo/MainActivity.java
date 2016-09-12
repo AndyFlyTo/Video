@@ -115,7 +115,7 @@ public class MainActivity extends AppCompatActivity {
 //    private RelativeLayout about_us;
 //
 //    private mReceive mr;
-    private IntentFilter intentFilter;
+//    private IntentFilter intentFilter;
 
 
 //    private ServiceConnection conn = new ServiceConnection() {
