@@ -21,23 +21,29 @@ import org.freedesktop.gstreamer.GStreamer;
 import activity.gcy.com.demo.R;
 
 public class Gstreamer3 extends Activity implements SurfaceHolder.Callback {
-    private float bx,by,ax,ay;
+    private float bx, by, ax, ay;
 
     private native void nativeInit();     // Initialize native code, build pipeline, etc
+
     private native void nativeFinalize(); // Destroy pipeline and shutdown native code
+
     private native void nativePlay();     // Set pipeline to PLAYING
+
     private native void nativePause();    // Set pipeline to PAUSED
+
     private static native boolean nativeClassInit(); // Initialize native class: cache Method IDs for callbacks
+
     private native void nativeSurfaceInit(Object surface);
+
     private native void nativeSurfaceFinalize();
+
     private long native_custom_data;      // Native code will use this to keep private data
 
     private boolean is_playing_desired;   // Whether the user asked to go to PLAYING
 
     // Called when the activity is first created.
     @Override
-    public void onCreate(Bundle savedInstanceState)
-    {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
 
@@ -46,7 +52,7 @@ public class Gstreamer3 extends Activity implements SurfaceHolder.Callback {
             GStreamer.init(this);
         } catch (Exception e) {
             Toast.makeText(this, e.getMessage(), Toast.LENGTH_LONG).show();
-            finish(); 
+            finish();
             return;
         }
 
@@ -59,7 +65,7 @@ public class Gstreamer3 extends Activity implements SurfaceHolder.Callback {
         play.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
                 is_playing_desired = true;
-                Log.d("chen","playing");
+                Log.d("chen", "playing");
                 nativePlay();
             }
         });
@@ -68,7 +74,7 @@ public class Gstreamer3 extends Activity implements SurfaceHolder.Callback {
         pause.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
                 is_playing_desired = false;
-                Log.d("chen","pause");
+                Log.d("chen", "pause");
                 nativePause();
             }
         });
@@ -81,7 +87,7 @@ public class Gstreamer3 extends Activity implements SurfaceHolder.Callback {
         sv.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
-                switch (event.getAction()){
+                switch (event.getAction()) {
 
                     case MotionEvent.ACTION_DOWN:
                         ax = event.getX();
@@ -91,23 +97,19 @@ public class Gstreamer3 extends Activity implements SurfaceHolder.Callback {
                     case MotionEvent.ACTION_UP:
                         bx = event.getX();
                         by = event.getY();
-                        if((by-ay)>(bx-ax)&&(by-ay)>(ax-bx)&&(by-ay)>50){
+                        if ((by - ay) > (bx - ax) && (by - ay) > (ax - bx) && (by - ay) > 50) {
                             new Thread(new HttpThread("CAMERA UP")).start();
                         }
-                        if((ay-by)>(bx-ax)&&(ay-by)>(ax-bx)&&(by-ay)<-50){
+                        if ((ay - by) > (bx - ax) && (ay - by) > (ax - bx) && (by - ay) < -50) {
                             new Thread(new HttpThread("CAMERA DOWN")).start();
                         }
-                        if((bx-ax)>(ay-by)&&(bx-ax)>(by-ay)&&(bx-ax)>50){
+                        if ((bx - ax) > (ay - by) && (bx - ax) > (by - ay) && (bx - ax) > 50) {
                             new Thread(new HttpThread("CAMERA LEFT")).start();
                         }
-                        if((ax-bx)>(ay-by)&&(ax-bx)>(by-ay)&&(bx-ax)<-50){
+                        if ((ax - bx) > (ay - by) && (ax - bx) > (by - ay) && (bx - ax) < -50) {
                             new Thread(new HttpThread("CAMERA RIGHT")).start();
                         }
-
-
-
                         break;
-
                 }
 
 
@@ -116,10 +118,10 @@ public class Gstreamer3 extends Activity implements SurfaceHolder.Callback {
         });
         if (savedInstanceState != null) {
             is_playing_desired = savedInstanceState.getBoolean("playing");
-            Log.i ("GStreamer", "Activity created. Saved state is playing:" + is_playing_desired);
+            Log.i("GStreamer", "Activity created. Saved state is playing:" + is_playing_desired);
         } else {
             is_playing_desired = false;
-            Log.i ("GStreamer", "Activity created. There is no saved state, playing: false");
+            Log.i("GStreamer", "Activity created. There is no saved state, playing: false");
         }
 
         // Start with disabled buttons, until native code is initialized
@@ -133,17 +135,15 @@ public class Gstreamer3 extends Activity implements SurfaceHolder.Callback {
     }
 
 
-
-    protected void onSaveInstanceState (Bundle outState) {
-        Log.d ("GStreamer", "Saving state, playing:" + is_playing_desired);
+    protected void onSaveInstanceState(Bundle outState) {
+        Log.d("GStreamer", "Saving state, playing:" + is_playing_desired);
         outState.putBoolean("playing", is_playing_desired);
     }
 
 
-
     @Override
     public void onBackPressed() {
-        setResult(1,null);
+        setResult(1, null);
         finish();
     }
 
@@ -158,21 +158,21 @@ public class Gstreamer3 extends Activity implements SurfaceHolder.Callback {
     // Called from native code. This sets the content of the TextView from the UI thread.
     private void setMessage(final String message) {
         final TextView tv = (TextView) this.findViewById(R.id.textview_message);
-        runOnUiThread (new Runnable() {
-          public void run() {
-            tv.setText(message);
-          }
+        runOnUiThread(new Runnable() {
+            public void run() {
+                tv.setText(message);
+            }
         });
     }
 
-    private String getRemoteVideoIP(){
+    private String getRemoteVideoIP() {
         return "";
     }
 
     // Called from native code. Native code calls this once it has created its pipeline and
     // the main loop is running, so it is ready to accept commands.
-    private void onGStreamerInitialized () {
-        Log.i ("GStreamer", "Gst initialized. Restoring state, playing:" + is_playing_desired);
+    private void onGStreamerInitialized() {
+        Log.i("GStreamer", "Gst initialized. Restoring state, playing:" + is_playing_desired);
         // Restore previous playing state
         if (is_playing_desired) {
             nativePlay();
@@ -184,7 +184,7 @@ public class Gstreamer3 extends Activity implements SurfaceHolder.Callback {
         final Activity activity = this;
         runOnUiThread(new Runnable() {
             public void run() {
-               //TODO
+                //TODO
                 activity.findViewById(R.id.button_play).setEnabled(true);
                 activity.findViewById(R.id.button_stop).setEnabled(true);
             }
@@ -198,10 +198,10 @@ public class Gstreamer3 extends Activity implements SurfaceHolder.Callback {
     }
 
     public void surfaceChanged(SurfaceHolder holder, int format, int width,
-            int height) {
+                               int height) {
         Log.d("GStreamer", "Surface changed to format " + format + " width "
                 + width + " height " + height);
-        nativeSurfaceInit (holder.getSurface());
+        nativeSurfaceInit(holder.getSurface());
     }
 
     public void surfaceCreated(SurfaceHolder holder) {
@@ -210,7 +210,7 @@ public class Gstreamer3 extends Activity implements SurfaceHolder.Callback {
 
     public void surfaceDestroyed(SurfaceHolder holder) {
         Log.d("GStreamer", "Surface destroyed");
-        nativeSurfaceFinalize ();
+        nativeSurfaceFinalize();
     }
 
 

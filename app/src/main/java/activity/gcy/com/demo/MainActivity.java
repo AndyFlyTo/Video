@@ -77,14 +77,14 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
+//        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+//        fab.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+//                        .setAction("Action", null).show();
+//            }
+//        });
 
         shimmerTextView=(ShimmerTextView)findViewById(R.id.shimmer_tv);
         shimmer = new Shimmer();
@@ -96,14 +96,11 @@ public class MainActivity extends AppCompatActivity {
         openVideoBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-//                Intent intent = new Intent(MainActivity.this, Gstreamer3.class);
-//                startActivity(intent);
                 MaterialDialog dialog=new MaterialDialog.Builder(MainActivity.this)
                         .title(R.string.title_open_video)
                         .content(R.string.dialog_open_video)
                         .progress(true, 100)
                         .show();
-//
 ////                new Thread(new HttpThread("VIDEO_START")).start();
 //
 //                Log.d("chen","openVideoBtn");

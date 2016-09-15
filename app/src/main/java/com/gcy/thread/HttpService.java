@@ -163,9 +163,9 @@ public class HttpService extends Service {
 
 
                         BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(conn.getOutputStream()));
-                        String ipinfo = "ip " + GetLocalIP.getLocalIpAddress();
-                        Log.d("chen", ipinfo);
-                        bw.write(ipinfo);
+                        String ipInfo = "ip " + GetLocalIP.getLocalIpAddress();
+                        Log.d("chen", ipInfo);
+                        bw.write(ipInfo);
                         bw.flush();
                         bw.close();
                         if (conn.getResponseCode() == 200) {
