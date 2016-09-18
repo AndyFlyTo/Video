@@ -15,43 +15,44 @@ public class TemporaryData {
     public static String IP_CLIENT;
 
 
-    private TemporaryData(){
+    private TemporaryData() {
         temporaryData = this;
     }
 
 
-    public static TemporaryData getInstance(){
-        if(temporaryData==null)
+    public static TemporaryData getInstance() {
+        if (temporaryData == null)
             new TemporaryData();
         return temporaryData;
     }
 
-    public boolean isVideoNow  = false;
+    public boolean isVideoNow = false;
 
     public List<String> mLampList;
 
-    public List<String> getmLampList(){
+    public List<String> getmLampList() {
         return mLampList;
     }
 
-    public void setmLampList(List <String> lampList){
-        if(mLampList==null)
+    public void setmLampList(List<String> lampList) {
+        if (mLampList == null)
             mLampList = new ArrayList<>();
         mLampList.clear();
-        if(lampList.size()!=4)
+        if (lampList.size() != 4)
             return;
-        for(int i=0;i<lampList.size();i++){
+        for (int i = 0; i < lampList.size(); i++) {
             this.mLampList.add(lampList.get(i));
 
         }
     }
 
     public boolean loginSuccess;
-    public void setLoginSuccess(boolean flag){
+
+    public void setLoginSuccess(boolean flag) {
         loginSuccess = flag;
     }
 
-    public boolean getLoginSuccess(){
+    public boolean getLoginSuccess() {
 
         return loginSuccess;
     }
@@ -86,11 +87,11 @@ public class TemporaryData {
         this.IP = IP;
     }
 
-    public void setFlagIsVideo(boolean flag){
+    public void setFlagIsVideo(boolean flag) {
         isVideoNow = flag;
-
     }
-    public boolean getFlagIs(){
+
+    public boolean getFlagIs() {
 
         return isVideoNow;
     }

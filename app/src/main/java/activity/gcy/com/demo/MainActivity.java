@@ -2,6 +2,9 @@ package activity.gcy.com.demo;
 
 
 import android.app.Activity;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -19,6 +22,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -65,12 +69,14 @@ public class MainActivity extends AppCompatActivity {
     private ShimmerTextView shimmerTextView;
     private Shimmer shimmer;
     private TemporaryData temporaryData;
+    private IsOrNotAcquaintanceReceiver isOrNotAcquaintanceReceiver;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_main);
-        temporaryData=TemporaryData.getInstance();
-        Intent serviceIntent=new Intent(this, HttpService.class);
+        temporaryData = TemporaryData.getInstance();
+        Intent serviceIntent = new Intent(this, HttpService.class);
         startService(serviceIntent);
 
 
@@ -86,61 +92,120 @@ public class MainActivity extends AppCompatActivity {
 //            }
 //        });
 
-        shimmerTextView=(ShimmerTextView)findViewById(R.id.shimmer_tv);
+        shimmerTextView = (ShimmerTextView) findViewById(R.id.shimmer_tv);
         shimmer = new Shimmer();
-        shimmer.start(shimmerTextView);
+
+        Intent intent=getIntent();
+        //true
+        if(temporaryData.getFlagIs()){
+            shimmerTextView.setText(intent.getStringExtra("data"));
+            shimmer.start(shimmerTextView);
+            Log.d("chen","tme"+shimmerTextView.getText());
+        }
 
 
-        openVideoBtn=(Button)findViewById(R.id.btn_open_video);
+        openVideoBtn = (Button) findViewById(R.id.btn_open_video);
 
         openVideoBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                MaterialDialog dialog=new MaterialDialog.Builder(MainActivity.this)
+                MaterialDialog dialog = new MaterialDialog.Builder(MainActivity.this)
                         .title(R.string.title_open_video)
                         .content(R.string.dialog_open_video)
                         .progress(true, 100)
                         .show();
 ////                new Thread(new HttpThread("VIDEO_START")).start();
 //
-//                Log.d("chen","openVideoBtn");
-                new Thread(new HttpGetVideoIPThread(MainActivity.this,dialog,false,temporaryData)).start();
+                new Thread(new HttpGetVideoIPThread(MainActivity.this, dialog, false, temporaryData)).start();
             }
         });
 
 
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction("isOrNotAcquaintanceNotification");
+        isOrNotAcquaintanceReceiver = new IsOrNotAcquaintanceReceiver();
+        registerReceiver(isOrNotAcquaintanceReceiver, intentFilter);
+
     }
 
-    //字体闪烁
-    public int clo=0;
-    public void spark(){
-        nameText=(TextView)findViewById(R.id.text_name);
-        Timer timer=new Timer();
-        TimerTask taskcc = new TimerTask(){
-            public void run() {
+    class IsOrNotAcquaintanceReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, final Intent intent) {
+            Log.d("chen","当前是否视频"+temporaryData.getFlagIs());
+            if (!temporaryData.getFlagIs()) {
+
                 runOnUiThread(new Runnable() {
+                    @Override
                     public void run() {
-                        if (clo == 0) {
-                            clo = 1;
-                            nameText.setTextColor(Color.TRANSPARENT); // 透明
-                        } else {
-                            if (clo == 1) {
-                                clo = 2;
-                                nameText.setTextColor(Color.RED);
-                            } else {
-                                clo = 0;
-                                nameText.setTextColor(Color.GREEN);
-                            }
+                        // TODO: 16-9-15
+                        Bundle bundle = intent.getExtras();
+                        String data = bundle.getString("name");
+                       if (data.equals("不是熟人")) {
+                            shimmerTextView.setText("您的朋友到访，请选择点击下方按钮查看");
+                            shimmer.start(shimmerTextView);
+                        } else if(data.equals("warning")){
+                            shimmerTextView.setText(data+ "到访，请选择点击下方按钮查看");
+                           temporaryData.setFlagIsVideo(true);
+                           shimmer.start(shimmerTextView);
                         }
                     }
                 });
+
+                NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+                Notification.Builder builder = new Notification.Builder(MainActivity.this);
+                builder.setSmallIcon(R.mipmap.ic_launcher);
+                builder.setContentTitle(" ");
+                builder.setContentText(shimmerTextView.getText());
+                builder.setAutoCancel(true);
+                Intent intent1 = new Intent(MainActivity.this, MainActivity.class);
+                intent1.putExtra("data",shimmerTextView.getText());
+                Log.d("chen","onReceiver中shimmerTextView"+shimmerTextView.getText());
+                PendingIntent pendingIntent = PendingIntent.getActivity(MainActivity.this, 0, intent1, PendingIntent.FLAG_CANCEL_CURRENT);
+                builder.setContentIntent(pendingIntent);
+                Notification notification = builder.build();
+                manager.notify(1, notification);
+
+
             }
-        };
-        timer.schedule(taskcc, 1, 300);
-        // 参数分别是delay（多长时间后执行），duration（执行间隔）
+        }
     }
 
-   /* @Override
+    //字体闪烁
+//    public int clo=0;
+//    public void spark(){
+//        nameText=(TextView)findViewById(R.id.text_name);
+//        Timer timer=new Timer();
+//        TimerTask taskcc = new TimerTask(){
+//            public void run() {
+//                runOnUiThread(new Runnable() {
+//                    public void run() {
+//                        if (clo == 0) {
+//                            clo = 1;
+//                            nameText.setTextColor(Color.TRANSPARENT); // 透明
+//                        } else {
+//                            if (clo == 1) {
+//                                clo = 2;
+//                                nameText.setTextColor(Color.RED);
+//                            } else {
+//                                clo = 0;
+//                                nameText.setTextColor(Color.GREEN);
+//                            }
+//                        }
+//                    }
+//                });
+//            }
+//        };
+//        timer.schedule(taskcc, 1, 300);
+//        // 参数分别是delay（多长时间后执行），duration（执行间隔）
+//    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        unregisterReceiver(isOrNotAcquaintanceReceiver);
+    }
+
+    /* @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
@@ -201,9 +266,302 @@ public class MainActivity extends Activity {
 
 
     */
-/********
-     * tab2
-     ******//*
+/***********************************
+ * tab2
+ * tab事件
+ * <p/>
+ * myappliances_add.setVisibility(View.GONE);
+ * <p/>
+ * <p/>
+ * myApplianceListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+ *
+ * @Override public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+ * <p/>
+ * //水温
+ * if (position == 2) {
+ * <p/>
+ * if (TEMP == null) {
+ * Toast.makeText(MainActivity.this, "连接服务器失败！请检查网络！", Toast.LENGTH_SHORT).show();
+ * return;
+ * }
+ * if (TEMP.equals("null")) {
+ * Toast.makeText(MainActivity.this, "设备离线！", Toast.LENGTH_SHORT).show();
+ * return;
+ * }
+ * Intent intent = new Intent(MainActivity.this, ApplicansWaterActivity.class);
+ * intent.putExtra(IntentKeyString.ENVIRONMENT_TEMP, TEMP);
+ * startActivity(intent);
+ * }
+ * <p/>
+ * <p/>
+ * //灯
+ * if (position == 5) {
+ * Intent intent = new Intent(MainActivity.this, ApplicansLampActivity.class);
+ * if (mLampList == null) {
+ * Toast.makeText(MainActivity.this, "无服务器连接请检查网络！", Toast.LENGTH_SHORT).show();
+ * return;
+ * }
+ * if (mLampList.size() != 4) {
+ * intent.putExtra("lamp1", "1");
+ * intent.putExtra("lamp2", "1");
+ * intent.putExtra("lamp3", "1");
+ * intent.putExtra("lamp4", "1");
+ * intent.putExtra("online", false);
+ * Toast.makeText(MainActivity.this, "获取数据失败请检查网络！", Toast.LENGTH_SHORT).show();
+ * } else {
+ * <p/>
+ * intent.putExtra("lamp1", mLampList.get(0));
+ * intent.putExtra("lamp2", mLampList.get(1));
+ * intent.putExtra("lamp3", mLampList.get(2));
+ * intent.putExtra("lamp4", mLampList.get(3));
+ * intent.putExtra("online", true);
+ * }
+ * <p/>
+ * startActivity(intent);
+ * <p/>
+ * <p/>
+ * }
+ * <p/>
+ * //风扇
+ * if (position == 6) {
+ * Intent intent = new Intent(MainActivity.this, ApplicansFanActivity.class);
+ * <p/>
+ * startActivity(intent);
+ * <p/>
+ * <p/>
+ * }
+ * <p/>
+ * <p/>
+ * }
+ * });
+ * <p/>
+ * titleBar.setOnTitleBarClickListener(new TitleBar.OnTitleBarClickListener() {
+ * @Override public void onLeftButtonClick(View v) {
+ * if (titleBar.getActionView().equals("back"))
+ * sliding_menu.openMenu();
+ * else
+ * sliding_menu.closeMenu();
+ * }
+ * @Override public void onRightButtonClick(View v) {
+ * <p/>
+ * }
+ * });
+ * <p/>
+ * <p/>
+ * //  监测频率设置
+ * config_frequency.setOnClickListener(new View.OnClickListener() {
+ * @Override public void onClick(View v) {
+ * Intent intent = new Intent(MainActivity.this, ConfigActivity.class);
+ * intent.putExtra(IntentKeyString.CONFIG_INTENT_KEY, IntentKeyString.CONFIG_INTENT_KEY_CONFIG_FREQUENCY);
+ * startActivityForResult(intent, 1);
+ * }
+ * });
+ * <p/>
+ * //环境参数标准值设置
+ * <p/>
+ * applican_standard.setOnClickListener(new View.OnClickListener() {
+ * @Override public void onClick(View v) {
+ * Intent intent = new Intent(MainActivity.this, ConfigActivity.class);
+ * intent.putExtra(IntentKeyString.CONFIG_INTENT_KEY, IntentKeyString.CONFIG_INTENT_KEY_APPLICANS_STANDARD);
+ * intent.putExtra("tempStandard", tempStandard);
+ * intent.putExtra("humiStandard", humiStandard);
+ * intent.putExtra("waterStandard", waterStandard);
+ * intent.putExtra("pm2_5Standard", pm2_5Standard);
+ * intent.putExtra("dangStandard", dangStandard);
+ * startActivityForResult(intent, 2);
+ * }
+ * });
+ * <p/>
+ * //停止监测
+ * <p/>
+ * stop_monitoring.setOnClickListener(new View.OnClickListener() {
+ * @Override public void onClick(View v) {
+ * if (stop_monitoring_text.getText().toString().equals("停止监测")) {
+ * <p/>
+ * mBinder.startMonitoring(false);
+ * stop_monitoring_text.setText("开始监测");
+ * } else {
+ * mBinder.startMonitoring(true);
+ * stop_monitoring_text.setText("停止监测");
+ * }
+ * }
+ * });
+ * <p/>
+ * //关于我们
+ * about_us.setOnClickListener(new View.OnClickListener() {
+ * @Override public void onClick(View v) {
+ * Intent intent = new Intent(MainActivity.this, ConfigActivity.class);
+ * intent.putExtra(IntentKeyString.CONFIG_INTENT_KEY, IntentKeyString.CONFIG_INTENT_KEY_ABOUT_US);
+ * startActivity(intent);
+ * }
+ * });
+ * <p/>
+ * <p/>
+ * main_tap_environment_listiew.setAdapter(environment_adapter);
+ * <p/>
+ * <p/>
+ * main_tap_environment_listiew.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+ * @Override public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+ * <p/>
+ * }
+ * });
+ * <p/>
+ * <p/>
+ * //打开视频！
+ * openVideo.setOnClickListener(new View.OnClickListener() {
+ * @Override public void onClick(View v) {
+ * <p/>
+ * ProgressDialog progressDialog = new ProgressDialog(MainActivity.this);
+ * //     new Thread(new HttpThread("VIDEO_START")).start();
+ * <p/>
+ * new Thread(new HttpGetVideoIPThread(MainActivity.this, progressDialog, false, temporaryData)).start();
+ * tab事件
+ * <p/>
+ * myappliances_add.setVisibility(View.GONE);
+ * <p/>
+ * <p/>
+ * myApplianceListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+ * @Override public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+ * <p/>
+ * //水温
+ * if (position == 2) {
+ * <p/>
+ * if (TEMP == null) {
+ * Toast.makeText(MainActivity.this, "连接服务器失败！请检查网络！", Toast.LENGTH_SHORT).show();
+ * return;
+ * }
+ * if (TEMP.equals("null")) {
+ * Toast.makeText(MainActivity.this, "设备离线！", Toast.LENGTH_SHORT).show();
+ * return;
+ * }
+ * Intent intent = new Intent(MainActivity.this, ApplicansWaterActivity.class);
+ * intent.putExtra(IntentKeyString.ENVIRONMENT_TEMP, TEMP);
+ * startActivity(intent);
+ * }
+ * <p/>
+ * <p/>
+ * //灯
+ * if (position == 5) {
+ * Intent intent = new Intent(MainActivity.this, ApplicansLampActivity.class);
+ * if (mLampList == null) {
+ * Toast.makeText(MainActivity.this, "无服务器连接请检查网络！", Toast.LENGTH_SHORT).show();
+ * return;
+ * }
+ * if (mLampList.size() != 4) {
+ * intent.putExtra("lamp1", "1");
+ * intent.putExtra("lamp2", "1");
+ * intent.putExtra("lamp3", "1");
+ * intent.putExtra("lamp4", "1");
+ * intent.putExtra("online", false);
+ * Toast.makeText(MainActivity.this, "获取数据失败请检查网络！", Toast.LENGTH_SHORT).show();
+ * } else {
+ * <p/>
+ * intent.putExtra("lamp1", mLampList.get(0));
+ * intent.putExtra("lamp2", mLampList.get(1));
+ * intent.putExtra("lamp3", mLampList.get(2));
+ * intent.putExtra("lamp4", mLampList.get(3));
+ * intent.putExtra("online", true);
+ * }
+ * <p/>
+ * startActivity(intent);
+ * <p/>
+ * <p/>
+ * }
+ * <p/>
+ * //风扇
+ * if (position == 6) {
+ * Intent intent = new Intent(MainActivity.this, ApplicansFanActivity.class);
+ * <p/>
+ * startActivity(intent);
+ * <p/>
+ * <p/>
+ * }
+ * <p/>
+ * <p/>
+ * }
+ * });
+ * <p/>
+ * titleBar.setOnTitleBarClickListener(new TitleBar.OnTitleBarClickListener() {
+ * @Override public void onLeftButtonClick(View v) {
+ * if (titleBar.getActionView().equals("back"))
+ * sliding_menu.openMenu();
+ * else
+ * sliding_menu.closeMenu();
+ * }
+ * @Override public void onRightButtonClick(View v) {
+ * <p/>
+ * }
+ * });
+ * <p/>
+ * <p/>
+ * //  监测频率设置
+ * config_frequency.setOnClickListener(new View.OnClickListener() {
+ * @Override public void onClick(View v) {
+ * Intent intent = new Intent(MainActivity.this, ConfigActivity.class);
+ * intent.putExtra(IntentKeyString.CONFIG_INTENT_KEY, IntentKeyString.CONFIG_INTENT_KEY_CONFIG_FREQUENCY);
+ * startActivityForResult(intent, 1);
+ * }
+ * });
+ * <p/>
+ * //环境参数标准值设置
+ * <p/>
+ * applican_standard.setOnClickListener(new View.OnClickListener() {
+ * @Override public void onClick(View v) {
+ * Intent intent = new Intent(MainActivity.this, ConfigActivity.class);
+ * intent.putExtra(IntentKeyString.CONFIG_INTENT_KEY, IntentKeyString.CONFIG_INTENT_KEY_APPLICANS_STANDARD);
+ * intent.putExtra("tempStandard", tempStandard);
+ * intent.putExtra("humiStandard", humiStandard);
+ * intent.putExtra("waterStandard", waterStandard);
+ * intent.putExtra("pm2_5Standard", pm2_5Standard);
+ * intent.putExtra("dangStandard", dangStandard);
+ * startActivityForResult(intent, 2);
+ * }
+ * });
+ * <p/>
+ * //停止监测
+ * <p/>
+ * stop_monitoring.setOnClickListener(new View.OnClickListener() {
+ * @Override public void onClick(View v) {
+ * if (stop_monitoring_text.getText().toString().equals("停止监测")) {
+ * <p/>
+ * mBinder.startMonitoring(false);
+ * stop_monitoring_text.setText("开始监测");
+ * } else {
+ * mBinder.startMonitoring(true);
+ * stop_monitoring_text.setText("停止监测");
+ * }
+ * }
+ * });
+ * <p/>
+ * //关于我们
+ * about_us.setOnClickListener(new View.OnClickListener() {
+ * @Override public void onClick(View v) {
+ * Intent intent = new Intent(MainActivity.this, ConfigActivity.class);
+ * intent.putExtra(IntentKeyString.CONFIG_INTENT_KEY, IntentKeyString.CONFIG_INTENT_KEY_ABOUT_US);
+ * startActivity(intent);
+ * }
+ * });
+ * <p/>
+ * <p/>
+ * main_tap_environment_listiew.setAdapter(environment_adapter);
+ * <p/>
+ * <p/>
+ * main_tap_environment_listiew.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+ * @Override public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+ * <p/>
+ * }
+ * });
+ * <p/>
+ * <p/>
+ * //打开视频！
+ * openVideo.setOnClickListener(new View.OnClickListener() {
+ * @Override public void onClick(View v) {
+ * <p/>
+ * ProgressDialog progressDialog = new ProgressDialog(MainActivity.this);
+ * //     new Thread(new HttpThread("VIDEO_START")).start();
+ * <p/>
+ * new Thread(new HttpGetVideoIPThread(MainActivity.this, progressDialog, false, temporaryData)).start();
+ *//*
 
     private ListView main_tap_environment_listiew;
     private MyappliancesEnvironmentAdapter environment_adapter;
@@ -380,161 +738,152 @@ public class MainActivity extends Activity {
         //*/
 /***********************************tab事件
 
-        myappliances_add.setVisibility(View.GONE);
+ myappliances_add.setVisibility(View.GONE);
 
 
-        myApplianceListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+ myApplianceListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+@Override public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
-                //水温
-                if (position == 2) {
+//水温
+if (position == 2) {
 
-                    if (TEMP == null) {
-                        Toast.makeText(MainActivity.this, "连接服务器失败！请检查网络！", Toast.LENGTH_SHORT).show();
-                        return;
-                    }
-                    if (TEMP.equals("null")) {
-                        Toast.makeText(MainActivity.this, "设备离线！", Toast.LENGTH_SHORT).show();
-                        return;
-                    }
-                    Intent intent = new Intent(MainActivity.this, ApplicansWaterActivity.class);
-                    intent.putExtra(IntentKeyString.ENVIRONMENT_TEMP, TEMP);
-                    startActivity(intent);
-                }
-
-
-                //灯
-                if (position == 5) {
-                    Intent intent = new Intent(MainActivity.this, ApplicansLampActivity.class);
-                    if (mLampList == null) {
-                        Toast.makeText(MainActivity.this, "无服务器连接请检查网络！", Toast.LENGTH_SHORT).show();
-                        return;
-                    }
-                    if (mLampList.size() != 4) {
-                        intent.putExtra("lamp1", "1");
-                        intent.putExtra("lamp2", "1");
-                        intent.putExtra("lamp3", "1");
-                        intent.putExtra("lamp4", "1");
-                        intent.putExtra("online", false);
-                        Toast.makeText(MainActivity.this, "获取数据失败请检查网络！", Toast.LENGTH_SHORT).show();
-                    } else {
-
-                        intent.putExtra("lamp1", mLampList.get(0));
-                        intent.putExtra("lamp2", mLampList.get(1));
-                        intent.putExtra("lamp3", mLampList.get(2));
-                        intent.putExtra("lamp4", mLampList.get(3));
-                        intent.putExtra("online", true);
-                    }
-
-                    startActivity(intent);
+if (TEMP == null) {
+Toast.makeText(MainActivity.this, "连接服务器失败！请检查网络！", Toast.LENGTH_SHORT).show();
+return;
+}
+if (TEMP.equals("null")) {
+Toast.makeText(MainActivity.this, "设备离线！", Toast.LENGTH_SHORT).show();
+return;
+}
+Intent intent = new Intent(MainActivity.this, ApplicansWaterActivity.class);
+intent.putExtra(IntentKeyString.ENVIRONMENT_TEMP, TEMP);
+startActivity(intent);
+}
 
 
-                }
+//灯
+if (position == 5) {
+Intent intent = new Intent(MainActivity.this, ApplicansLampActivity.class);
+if (mLampList == null) {
+Toast.makeText(MainActivity.this, "无服务器连接请检查网络！", Toast.LENGTH_SHORT).show();
+return;
+}
+if (mLampList.size() != 4) {
+intent.putExtra("lamp1", "1");
+intent.putExtra("lamp2", "1");
+intent.putExtra("lamp3", "1");
+intent.putExtra("lamp4", "1");
+intent.putExtra("online", false);
+Toast.makeText(MainActivity.this, "获取数据失败请检查网络！", Toast.LENGTH_SHORT).show();
+} else {
 
-                //风扇
-                if (position == 6) {
-                    Intent intent = new Intent(MainActivity.this, ApplicansFanActivity.class);
+intent.putExtra("lamp1", mLampList.get(0));
+intent.putExtra("lamp2", mLampList.get(1));
+intent.putExtra("lamp3", mLampList.get(2));
+intent.putExtra("lamp4", mLampList.get(3));
+intent.putExtra("online", true);
+}
 
-                    startActivity(intent);
-
-
-                }
-
-
-            }
-        });
-
-        titleBar.setOnTitleBarClickListener(new TitleBar.OnTitleBarClickListener() {
-            @Override
-            public void onLeftButtonClick(View v) {
-                if (titleBar.getActionView().equals("back"))
-                    sliding_menu.openMenu();
-                else
-                    sliding_menu.closeMenu();
-            }
-
-            @Override
-            public void onRightButtonClick(View v) {
-
-            }
-        });
+startActivity(intent);
 
 
-        //  监测频率设置
-        config_frequency.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this, ConfigActivity.class);
-                intent.putExtra(IntentKeyString.CONFIG_INTENT_KEY, IntentKeyString.CONFIG_INTENT_KEY_CONFIG_FREQUENCY);
-                startActivityForResult(intent, 1);
-            }
-        });
+}
 
-        //环境参数标准值设置
+//风扇
+if (position == 6) {
+Intent intent = new Intent(MainActivity.this, ApplicansFanActivity.class);
 
-        applican_standard.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this, ConfigActivity.class);
-                intent.putExtra(IntentKeyString.CONFIG_INTENT_KEY, IntentKeyString.CONFIG_INTENT_KEY_APPLICANS_STANDARD);
-                intent.putExtra("tempStandard", tempStandard);
-                intent.putExtra("humiStandard", humiStandard);
-                intent.putExtra("waterStandard", waterStandard);
-                intent.putExtra("pm2_5Standard", pm2_5Standard);
-                intent.putExtra("dangStandard", dangStandard);
-                startActivityForResult(intent, 2);
-            }
-        });
-
-        //停止监测
-
-        stop_monitoring.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (stop_monitoring_text.getText().toString().equals("停止监测")) {
-
-                    mBinder.startMonitoring(false);
-                    stop_monitoring_text.setText("开始监测");
-                } else {
-                    mBinder.startMonitoring(true);
-                    stop_monitoring_text.setText("停止监测");
-                }
-            }
-        });
-
-        //关于我们
-        about_us.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this, ConfigActivity.class);
-                intent.putExtra(IntentKeyString.CONFIG_INTENT_KEY, IntentKeyString.CONFIG_INTENT_KEY_ABOUT_US);
-                startActivity(intent);
-            }
-        });
+startActivity(intent);
 
 
-        main_tap_environment_listiew.setAdapter(environment_adapter);
+}
 
 
-        main_tap_environment_listiew.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+}
+});
 
-            }
-        });
+ titleBar.setOnTitleBarClickListener(new TitleBar.OnTitleBarClickListener() {
+@Override public void onLeftButtonClick(View v) {
+if (titleBar.getActionView().equals("back"))
+sliding_menu.openMenu();
+else
+sliding_menu.closeMenu();
+}
+
+@Override public void onRightButtonClick(View v) {
+
+}
+});
 
 
-        //打开视频！
-        openVideo.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+ //  监测频率设置
+ config_frequency.setOnClickListener(new View.OnClickListener() {
+@Override public void onClick(View v) {
+Intent intent = new Intent(MainActivity.this, ConfigActivity.class);
+intent.putExtra(IntentKeyString.CONFIG_INTENT_KEY, IntentKeyString.CONFIG_INTENT_KEY_CONFIG_FREQUENCY);
+startActivityForResult(intent, 1);
+}
+});
 
-                ProgressDialog progressDialog = new ProgressDialog(MainActivity.this);
-                //     new Thread(new HttpThread("VIDEO_START")).start();
+ //环境参数标准值设置
 
-                new Thread(new HttpGetVideoIPThread(MainActivity.this, progressDialog, false, temporaryData)).start();
-      */
+ applican_standard.setOnClickListener(new View.OnClickListener() {
+@Override public void onClick(View v) {
+Intent intent = new Intent(MainActivity.this, ConfigActivity.class);
+intent.putExtra(IntentKeyString.CONFIG_INTENT_KEY, IntentKeyString.CONFIG_INTENT_KEY_APPLICANS_STANDARD);
+intent.putExtra("tempStandard", tempStandard);
+intent.putExtra("humiStandard", humiStandard);
+intent.putExtra("waterStandard", waterStandard);
+intent.putExtra("pm2_5Standard", pm2_5Standard);
+intent.putExtra("dangStandard", dangStandard);
+startActivityForResult(intent, 2);
+}
+});
+
+ //停止监测
+
+ stop_monitoring.setOnClickListener(new View.OnClickListener() {
+@Override public void onClick(View v) {
+if (stop_monitoring_text.getText().toString().equals("停止监测")) {
+
+mBinder.startMonitoring(false);
+stop_monitoring_text.setText("开始监测");
+} else {
+mBinder.startMonitoring(true);
+stop_monitoring_text.setText("停止监测");
+}
+}
+});
+
+ //关于我们
+ about_us.setOnClickListener(new View.OnClickListener() {
+@Override public void onClick(View v) {
+Intent intent = new Intent(MainActivity.this, ConfigActivity.class);
+intent.putExtra(IntentKeyString.CONFIG_INTENT_KEY, IntentKeyString.CONFIG_INTENT_KEY_ABOUT_US);
+startActivity(intent);
+}
+});
+
+
+ main_tap_environment_listiew.setAdapter(environment_adapter);
+
+
+ main_tap_environment_listiew.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+@Override public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
+}
+});
+
+
+ //打开视频！
+ openVideo.setOnClickListener(new View.OnClickListener() {
+@Override public void onClick(View v) {
+
+ProgressDialog progressDialog = new ProgressDialog(MainActivity.this);
+//     new Thread(new HttpThread("VIDEO_START")).start();
+
+new Thread(new HttpGetVideoIPThread(MainActivity.this, progressDialog, false, temporaryData)).start();
+ */
 /*          progressDialog.setTitle("请稍后...");
                 progressDialog.setMessage("正在获取IP中...");
                 progressDialog.setCancelable(true);

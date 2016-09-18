@@ -22,7 +22,7 @@
 
     <com.romainpiel.shimmer.ShimmerTextView
         android:id="@+id/shimmer_tv"
-        android:text="您的朋友到访，请选择点击下方按钮查看"
+        android:text="当前无人来访"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"

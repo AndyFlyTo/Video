@@ -3,6 +3,7 @@ package com.gcy.thread;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
@@ -70,6 +71,7 @@ public class HttpService extends Service {
 
     private Thread EnvironmentThread;                       //从服务器获取环境数据的线程
     private Thread IPThread;                                //向服务器发送ip的线程
+    private Thread faceThread;                              //接受服务器发送的是否为熟人的线程
 
     private List<String> mList;                             //装载环境参数信息
     private List<String> mLampList;                         //装载灯信息状态
@@ -99,11 +101,15 @@ public class HttpService extends Service {
 
         EnvironmentThread = new Thread(mHttpRunnable);
         IPThread = new Thread(mIPRunnable);
+        faceThread=new Thread(faceRunable);
+
 
         servicealive = true;
 
         EnvironmentThread.start();
         IPThread.start();
+        faceThread.start();
+
 
         servicealive = true;
 
@@ -216,6 +222,7 @@ public class HttpService extends Service {
     };
 
 
+    // TODO: 16-9-15
     //接受来自服务器的是否为熟人的数据
     Runnable faceRunable = new Runnable() {
         @Override
@@ -232,7 +239,7 @@ public class HttpService extends Service {
 
                 while (isAliving) {
                     try {
-
+                        Thread.sleep(5000);
                         URL httpUrl = new URL(Config.URL);
                         HttpURLConnection conn = (HttpURLConnection) httpUrl.openConnection();
                         conn.setRequestMethod("POST");
@@ -243,16 +250,30 @@ public class HttpService extends Service {
                         conn.connect();
 
                         BufferedWriter out = new BufferedWriter(new OutputStreamWriter(conn.getOutputStream()));
-                        out.write("get_me_message");
+                        out.write("get_message");
                         out.flush();
                         out.close();
 
+                        // TODO: 16-9-15 接受是否为熟人的数据,熟人时传回人名
                         if (conn.getResponseCode() == 200) {
                             BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
                             StringBuffer sb = new StringBuffer();
                             String s;
                             while ((s = reader.readLine()) != null) {
                                 sb.append(s);
+                            }
+                            // TODO: 16-9-15
+//                            if(sb.equals("不是熟人")){
+//                                sb.setLength(0);
+//                                sb.append(" ");
+//                                Log.d("chen","不是熟人时stringBffer显示："+sb.toString());
+//                            }
+                            if(sb!=null) {
+                                Intent intent = new Intent();
+                                intent.putExtra("name", sb.toString());
+                                intent.setAction("isOrNotAcquaintanceNotification");
+                                sendBroadcast(intent);
+                                Log.d("chen", "熟人信息：" + sb + "");
                             }
 
                         } else {

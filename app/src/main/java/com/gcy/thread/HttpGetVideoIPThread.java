@@ -60,7 +60,7 @@ public class HttpGetVideoIPThread implements Runnable {
 
 
                 BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(conn.getOutputStream()));
-                bw.write("get_ip hjy");
+                bw.write("get_ip");
                 bw.flush();
                 bw.close();
                 if (conn.getResponseCode() == 200) {
