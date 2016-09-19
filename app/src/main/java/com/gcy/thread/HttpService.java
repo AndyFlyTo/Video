@@ -9,6 +9,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.Vibrator;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.WindowManager;
 
@@ -234,12 +235,9 @@ public class HttpService extends Service {
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
-
                 }
-
                 while (isAliving) {
                     try {
-                        Thread.sleep(5000);
                         URL httpUrl = new URL(Config.URL);
                         HttpURLConnection conn = (HttpURLConnection) httpUrl.openConnection();
                         conn.setRequestMethod("POST");
@@ -268,7 +266,7 @@ public class HttpService extends Service {
 //                                sb.append(" ");
 //                                Log.d("chen","不是熟人时stringBffer显示："+sb.toString());
 //                            }
-                            if(sb!=null) {
+                            if(!TextUtils.isEmpty(sb)) {
                                 Intent intent = new Intent();
                                 intent.putExtra("name", sb.toString());
                                 intent.setAction("isOrNotAcquaintanceNotification");

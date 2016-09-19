@@ -9,11 +9,14 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.gcy.beans.TemporaryData;
+import com.gcy.thread.HttpSendNameThread;
 import com.gcy.thread.HttpThread;
 
 import org.freedesktop.gstreamer.GStreamer;
@@ -41,6 +44,7 @@ public class Gstreamer3 extends Activity implements SurfaceHolder.Callback {
 
     private boolean is_playing_desired;   // Whether the user asked to go to PLAYING
 
+    private TemporaryData temporaryData;
     // Called when the activity is first created.
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -59,8 +63,19 @@ public class Gstreamer3 extends Activity implements SurfaceHolder.Callback {
         setContentView(R.layout.activity_main);
 
         ImageButton play = (ImageButton) this.findViewById(R.id.button_play);
+        final EditText text=(EditText)findViewById(R.id.text_set_up_name);
 
-        TemporaryData.getInstance().setFlagIsVideo(true);    //视频已开启
+        Button send_name=(Button)findViewById(R.id.btn_send_name);
+        send_name.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                new Thread(new HttpSendNameThread(text.getText().toString())).start();
+            }
+        });
+
+        //视频已开启
+        temporaryData=TemporaryData.getInstance();
+        temporaryData.setFlagIsVideo(true);
 
         play.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
@@ -148,6 +163,7 @@ public class Gstreamer3 extends Activity implements SurfaceHolder.Callback {
     }
 
     protected void onDestroy() {
+        temporaryData.setFlagIsVideo(false);
 
         //TemporaryData.getInstance().setFlagIsVideo(false);
         nativeFinalize();

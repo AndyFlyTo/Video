@@ -22,6 +22,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -96,11 +97,16 @@ public class MainActivity extends AppCompatActivity {
         shimmer = new Shimmer();
 
         Intent intent=getIntent();
-        //true
-        if(temporaryData.getFlagIs()){
+        //视频未开启时 一种是视频结束，一种是视频没开启
+        if(!temporaryData.getFlagIs()){
             shimmerTextView.setText(intent.getStringExtra("data"));
             shimmer.start(shimmerTextView);
-            Log.d("chen","tme"+shimmerTextView.getText());
+            if(TextUtils.isEmpty(shimmerTextView.getText())) {
+                Log.d("chen", "tme" + shimmerTextView.getText());
+              shimmerTextView.setText("当前无人来访");
+            }
+
+
         }
 
 
@@ -140,11 +146,13 @@ public class MainActivity extends AppCompatActivity {
                         // TODO: 16-9-15
                         Bundle bundle = intent.getExtras();
                         String data = bundle.getString("name");
-                       if (data.equals("不是熟人")) {
+                        String[] name=data.split(" ");
+                        Log.d("chen","name:"+name[1]);
+                       if (name[1].equals("none")) {
                             shimmerTextView.setText("您的朋友到访，请选择点击下方按钮查看");
                             shimmer.start(shimmerTextView);
-                        } else if(data.equals("warning")){
-                            shimmerTextView.setText(data+ "到访，请选择点击下方按钮查看");
+                        } else {
+                            shimmerTextView.setText(name[1]+ "到访，请选择点击下方按钮查看");
                            temporaryData.setFlagIsVideo(true);
                            shimmer.start(shimmerTextView);
                         }
@@ -160,6 +168,7 @@ public class MainActivity extends AppCompatActivity {
                 Intent intent1 = new Intent(MainActivity.this, MainActivity.class);
                 intent1.putExtra("data",shimmerTextView.getText());
                 Log.d("chen","onReceiver中shimmerTextView"+shimmerTextView.getText());
+                //这个没错
                 PendingIntent pendingIntent = PendingIntent.getActivity(MainActivity.this, 0, intent1, PendingIntent.FLAG_CANCEL_CURRENT);
                 builder.setContentIntent(pendingIntent);
                 Notification notification = builder.build();
